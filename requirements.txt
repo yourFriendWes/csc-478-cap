@@ -1,2 +1,3 @@
 connexion==2.3.0
 Flask==1.1.1
+swagger-ui-bundle==0.0.5
