@@ -14,7 +14,7 @@ basePath: "/api"
 paths:
   /location:
     get:
-      operationId: "location.supported_locations"
+      operationId: "api.location.supported_locations"
       tags:
         - "Location"
       summary: "The location data structure supported by the traveler application"
