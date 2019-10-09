@@ -8,6 +8,7 @@ from models import RevokedTokenModel, UserModel
 parser = reqparse.RequestParser()
 parser.add_argument('username', help = 'This field cannot be blank', required = True)
 parser.add_argument('password', help = 'This field cannot be blank', required = True)
+parser.add_argument('zipcode', required = False)
 
 
 class UserRegistration(Resource):
@@ -97,6 +98,15 @@ class WeatherResource(Resource):
     def get(self):
         return {
             'today': "Atmosphere is habitable."
+        }
+
+    @jwt_required
+    def post(self):
+        data = parser.parse_args()
+        zipcode = data['zipcode']
+        message = f'The weather in {zipcode} is habitable.'
+        return {
+            'today': message
         }
 
 
