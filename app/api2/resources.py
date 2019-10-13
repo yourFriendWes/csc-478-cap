@@ -4,11 +4,14 @@ from flask_jwt_extended import (create_access_token, create_refresh_token,
 from flask_restful import Resource, reqparse
 
 from models import RevokedTokenModel, UserModel
+import requests
 
 parser = reqparse.RequestParser()
 parser.add_argument('username', help = 'This field cannot be blank', required = True)
 parser.add_argument('password', help = 'This field cannot be blank', required = True)
-parser.add_argument('zipcode', required = False)
+
+parser2 = reqparse.RequestParser()
+parser2.add_argument('zipcode', required = True)
 
 
 class UserRegistration(Resource):
@@ -102,9 +105,20 @@ class WeatherResource(Resource):
 
     @jwt_required
     def post(self):
-        data = parser.parse_args()
+        url = 'http://api.openweathermap.org/data/2.5/weather?zip={}&units=imperial&appid=b78976efd95624604152b83c5638cdcb'
+
+        data = parser2.parse_args()
         zipcode = data['zipcode']
-        message = f'The weather in {zipcode} is habitable.'
+        r = requests.get(url.format(zipcode)).json()
+
+        weather = {
+            'city': r['name'],
+            'zipcode': zipcode,
+            'temperature': r['main']['temp'],
+            'description': r['weather'][0]['description']
+        }
+
+        message = f'The weather in {weather["city"]} is {weather["description"]} at {weather["temperature"]} degrees Fahrenheit.'
         return {
             'today': message
         }
