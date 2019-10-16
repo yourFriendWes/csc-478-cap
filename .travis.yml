@@ -1,9 +1,13 @@
 language: python
 python:
-  - "3.6"
-  - "3.7"
+- '3.6'
+- '3.7'
 install:
-  - pip install -r requirements.txt
-# command to run tests
+- pip install -r requirements.txt
 script:
-  - python -m pytest tests/
+- python -m pytest tests/
+deploy:
+  provider: heroku
+  api_key:
+    secure: VdnFp2xKW0UvTMvD4dXpURrvD4xOwQ8ex18OS1cOSP/TkFgO0W9/btN/SpFeSf5NTHSc9FESovSYA7qJBG290N3VtPar3jlm31lZhzfxnx2PI3MRoSAML5+CxkGNfMTqJYs4kbH7tTcHCVynK/cBuBqGaHQTaO85WNhXCVdM14dz9987RF1W5TdIgo9b68K/CK1Sa0HC1+2gPzIEUfXix59LKu12820B6xxlwN7j2aqunFirksvsm3hx+1XdRvWsRmy6eJH7vn5xu5tr4Eg21XtAqzGQIEXZhKV5OUtsXPqInn+NsgDgxw108Sg+JjXe/eZrYZCbi65Zdl0uVKfsTDEpqC5kl6wxByF0JS9XgQnM5gFLIzc3M2RUZUPh//i8rLp/50Z5SNhi7xSWsLA2wevGmOYGmuOxZiGLwZ0FKBLb0hUDiKJlcYQU4+kX790YGBoEItwD7vUwTjpCu+VEWuCgSQBtRhCKJiKWt3QAd1+67qUnLo9ROLLDFQJy8rMnHXa5FFKv8D2/8RpQMfBwvTwSR3B2EKpx2QoWn5xwmfJwrN9wrDEeSh5O7CmwnLaUXUehBo5LpKk55YEscQ/KsmegoQmyiM4LzM+I+KC/1rmVw41e8GzG6uzDBZBD2w//OnipycmSvU96a1wxzb7bveTPUcIhrgmHGKcgyAFQAgQ=
+  app: csc-478-travel-api
