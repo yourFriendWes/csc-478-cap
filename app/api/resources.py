@@ -3,7 +3,7 @@ from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 jwt_refresh_token_required, jwt_required)
 from flask_restful import Resource, reqparse
 
-from models import RevokedTokenModel, UserModel
+from app.api.models import RevokedTokenModel, UserModel
 
 parser = reqparse.RequestParser()
 parser.add_argument('username', help = 'This field cannot be blank', required = True)
