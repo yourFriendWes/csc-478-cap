@@ -1,28 +1,40 @@
-"""
-Main module of the server file
-"""
-
-from flask import render_template
-import connexion
+from flask import Flask
+from flask_jwt_extended import JWTManager
+from flask_restful import Api
+from flask_sqlalchemy import SQLAlchemy
 
 
-# Create the application instance
-app = connexion.App(__name__, specification_dir="./")
+app = Flask(__name__)
+api = Api(app)
 
-# Read the swagger.yml file to configure the endpoints
-app.add_api("swagger.yml")
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = 'some-secret-string'
+
+db = SQLAlchemy(app)
+
+from api import models, resources, views
+
+@app.before_first_request
+def create_tables():
+    db.create_all()
+
+app.config['JWT_SECRET_KEY'] = 'jwt-secret-string'
+jwt = JWTManager(app)
+
+app.config['JWT_BLACKLIST_ENABLED'] = True
+app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
+
+@jwt.token_in_blacklist_loader
+def check_if_token_in_blacklist(decrypted_token):
+    jti = decrypted_token['jti']
+    return models.RevokedTokenModel.is_jti_blacklisted(jti)
 
 
-# create a URL route in our application for "/"
-@app.route("/")
-def home():
-    """
-    This function just responds to the browser URL
-    localhost:5000/
-    :return:        the rendered template "home.html"
-    """
-    return render_template("home.html")
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
+api.add_resource(resources.UserRegistration, '/registration')
+api.add_resource(resources.UserLogin, '/login')
+api.add_resource(resources.UserLogoutAccess, '/logout/access')
+api.add_resource(resources.UserLogoutRefresh, '/logout/refresh')
+api.add_resource(resources.TokenRefresh, '/token/refresh')
+api.add_resource(resources.AllUsers, '/users')
+api.add_resource(resources.WeatherResource, '/weather')
