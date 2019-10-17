@@ -6,17 +6,72 @@ Clone the repo locally
 
 Install required imports `pip install -r requirements.txt`
 
-# Running project locally
+# Running api locally
 
-`python server.py`
+Make sure you are in the /app directory when running the following commands
 
-visit http://localhost:5000 to view sample html
+start the application with `FLASK_APP=run.py FLASK_DEBUG=1 flask run`
 
-visit http://localhost:5000/api/ui/ to view swagger API and interact with endpoints
+visit http://localhost:5000 to view sample message
 
-visit http://localhost:5000/location to view sample api endpoint
+make a post request to http://localhost:5000/registration to register your user. You will need to send a JSON body in the following format:
 
-Make sample API GET request by opening a second terminal window while the application is running and curling endpoint `curl http://localhost:5000/api/location`
+```
+{
+    "username": "test",
+    "password": "test"
+}
+```
+
+Example cURL request
+
+```
+curl -X POST \
+  http://localhost:5000/registration \
+  -H 'content-type: application/json' \
+  -d '{
+    "username": "booboo",
+    "password": "test"
+}'
+```
+
+You can view your user and and encoded version of your password by visiting http://localhost:5000/users
+
+request:
+
+```
+curl http://localhost:5000/users
+```
+response:
+```
+{
+    "users": [
+        {
+            "username": "booboo",
+            "password": "$pbkdf2-sha256$29000$2xtDSIkxRsiZc671/t/7Pw$4bfOX0O9wLaD5o8g66thqBqFEdN.2EhPh3XeWYBbRHg"
+        }
+    ]
+}
+```
+Visit http://localhost:5000/login to login your user and receive an access_token and refresh_token. Use the same body you used to register your user
+```
+curl -X POST \
+  http://localhost:5000/login \
+  -H 'content-type: application/json' \
+  -d '{
+    "username": "boo",
+    "password": "test"
+}'
+```
+
+Visit http://localhost:5000/weather and include the authorization header Authorization Bearer: <your access_token>
+```
+curl -X GET \
+  http://localhost:5000/weather \
+  -H 'authorization: Bearer <YOUR TOKEN>'
+
+```
+http://localhost:5000/api/location`
 
 # Running and adding tests locally
 
