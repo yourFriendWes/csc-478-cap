@@ -10,7 +10,7 @@ parser.add_argument('username', help = 'This field cannot be blank', required = 
 parser.add_argument('password', help = 'This field cannot be blank', required = True)
 
 zip_parser = reqparse.RequestParser()
-zip_parser.add_argument('zipcode', required = True)
+zip_parser.add_argument('zipcode', help = 'This field cannot be blank', required = True)
 
 
 class UserRegistration(Resource):
