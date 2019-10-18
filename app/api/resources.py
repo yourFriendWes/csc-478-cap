@@ -9,6 +9,9 @@ parser = reqparse.RequestParser()
 parser.add_argument('username', help = 'This field cannot be blank', required = True)
 parser.add_argument('password', help = 'This field cannot be blank', required = True)
 
+zip_parser = reqparse.RequestParser()
+zip_parser.add_argument('zipcode', required = True)
+
 
 class UserRegistration(Resource):
     def post(self):
@@ -98,6 +101,14 @@ class WeatherResource(Resource):
         return {
             'today': "Atmosphere is habitable."
         }
+
+
+class ZipCodeEntry(Resource):
+    @jwt_required
+    def post(self):
+        data = zip_parser.parse_args()
+        zipcode = data['zipcode']
+        return zipcode
 
 
 class TokenRefresh(Resource):
