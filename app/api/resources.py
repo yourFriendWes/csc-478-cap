@@ -8,8 +8,6 @@ from app.api.models import RevokedTokenModel, UserModel
 import requests
 import os
 
-open_weather = os.environ.get('OPEN_WEATHER_KEY')
-
 parser = reqparse.RequestParser()
 parser.add_argument('username', help = 'This field cannot be blank', required = True)
 parser.add_argument('password', help = 'This field cannot be blank', required = True)
@@ -17,9 +15,9 @@ parser.add_argument('password', help = 'This field cannot be blank', required = 
 zip_parser = reqparse.RequestParser()
 zip_parser.add_argument('zipcode', help = 'This field cannot be blank', required = True)
 
-# global zipcode to grant access to classes set with default value
-# todo: is there a better way to grant accessibilty with jwt?
+# Global variables
 zipcode = 98101
+open_weather = os.environ.get('OPEN_WEATHER_KEY')
 
 
 class UserRegistration(Resource):
