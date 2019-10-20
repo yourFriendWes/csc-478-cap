@@ -5,12 +5,21 @@ from flask_restful import Resource, reqparse
 
 from app.api.models import RevokedTokenModel, UserModel
 
+import requests
+import os
+
+open_weather = os.environ.get('OPEN_WEATHER_KEY')
+
 parser = reqparse.RequestParser()
 parser.add_argument('username', help = 'This field cannot be blank', required = True)
 parser.add_argument('password', help = 'This field cannot be blank', required = True)
 
 zip_parser = reqparse.RequestParser()
 zip_parser.add_argument('zipcode', help = 'This field cannot be blank', required = True)
+
+# global zipcode to grant access to classes set with default value
+# todo: is there a better way to grant accessibilty with jwt?
+zipcode = 98101
 
 
 class UserRegistration(Resource):
@@ -98,8 +107,22 @@ class AllUsers(Resource):
 class WeatherResource(Resource):
     @jwt_required
     def get(self):
+        global open_weather
+        global zipcode
+        url = 'http://api.openweathermap.org/data/2.5/weather?zip={}&units=imperial&appid={}'
+        r = requests.get(url.format(zipcode, open_weather)).json()
+
+        weather_data = {
+            'city': r['name'],
+            'zipcode': zipcode,
+            'temperature': r['main']['temp'],
+            'description': r['weather'][0]['description']
+        }
+
+        weather_message = f'{weather_data["temperature"]:.1f} degrees and {weather_data["description"]}'
+
         return {
-            'today': "Atmosphere is habitable."
+            weather_data['city']: weather_message
         }
 
 
@@ -107,6 +130,7 @@ class ZipCodeEntry(Resource):
     @jwt_required
     def post(self):
         data = zip_parser.parse_args()
+        global zipcode
         zipcode = data['zipcode']
         return zipcode
 
