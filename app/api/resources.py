@@ -129,7 +129,7 @@ class ZipCodeEntry(Resource):
         data = zip_parser.parse_args()
         global zipcode
         zipcode = data['zipcode']
-        return zipcode
+        return {"zip entered": zipcode}
 
 
 class TokenRefresh(Resource):

@@ -7,4 +7,4 @@ gunicorn
 passlib
 flask-sqlalchemy
 requests
-dotenv
+python-dotenv
