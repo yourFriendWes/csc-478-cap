@@ -2,11 +2,10 @@ from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 get_jwt_identity, get_raw_jwt,
                                 jwt_refresh_token_required, jwt_required)
 from flask_restful import Resource, reqparse
-
 from app.api.models import RevokedTokenModel, UserModel
 
 import requests
-import os
+from os import environ
 
 parser = reqparse.RequestParser()
 parser.add_argument('username', help = 'This field cannot be blank', required = True)
@@ -17,7 +16,7 @@ zip_parser.add_argument('zipcode', help = 'This field cannot be blank', required
 
 # Global variables
 zipcode = 98101
-open_weather = os.environ.get('OPEN_WEATHER_KEY')
+open_weather = environ.get('OPEN_WEATHER_KEY')
 
 
 class UserRegistration(Resource):
