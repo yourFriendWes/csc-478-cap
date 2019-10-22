@@ -112,16 +112,47 @@ class WeatherResource(Resource):
         r = requests.get(url.format(location['zipcode'], open_weather)).json()
 
         weather_data = {
-            'city': r['name'],
             'temperature': r['main']['temp'],
             'description': r['weather'][0]['description']
         }
 
-        weather_message = f'{weather_data["temperature"]:.1f} degrees and {weather_data["description"]}'
+        weather_message = f"{weather_data['temperature']:.1f} degrees and {weather_data['description']}"
 
         return {
-            weather_data['city']: weather_message
+            location['city']: weather_message
         }
+
+
+class WeatherFiveDay(Resource):
+    @jwt_required
+    def get(self):
+        url = 'http://api.openweathermap.org/data/2.5/forecast?zip={}&units=imperial&appid={}'
+        r = requests.get(url.format(location['zipcode'], open_weather)).json()
+
+        five_day = {
+            "Day 1": {
+                'temperature': r['list'][0]['main']['temp'],
+                'description': r['list'][0]['weather'][0]['description']
+            },
+            "Day 2": {
+                'temperature': r['list'][1]['main']['temp'],
+                'description': r['list'][1]['weather'][0]['description']
+            },
+            "Day 3": {
+                'temperature': r['list'][2]['main']['temp'],
+                'description': r['list'][2]['weather'][0]['description']
+            },
+            "Day 4": {
+                'temperature': r['list'][3]['main']['temp'],
+                'description': r['list'][3]['weather'][0]['description']
+            },
+            "Day 5": {
+                'temperature': r['list'][4]['main']['temp'],
+                'description': r['list'][4]['weather'][0]['description']
+            }
+        }
+
+        return five_day
 
 
 class Location(Resource):
@@ -140,9 +171,8 @@ class ZipCodeEntry(Resource):
     def post(self):
         # todo: check that zipcode is valid
         data = zip_parser.parse_args()
-        # global location
         location['zipcode'] = data['zipcode']
-        return {"zip entered": location['zipcode']}
+        return {'zip entered': location['zipcode']}
 
 
 class TokenRefresh(Resource):
