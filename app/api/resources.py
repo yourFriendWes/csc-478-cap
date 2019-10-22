@@ -15,8 +15,12 @@ zip_parser = reqparse.RequestParser()
 zip_parser.add_argument('zipcode', help = 'This field cannot be blank', required = True)
 
 # Global variables
-zipcode = 98101
 open_weather = environ.get('OPEN_WEATHER_KEY')
+location = {
+    'zipcode': '98101',
+    'city': 'Seattle',
+    'country': 'US'
+}
 
 
 class UserRegistration(Resource):
@@ -104,14 +108,11 @@ class AllUsers(Resource):
 class WeatherResource(Resource):
     @jwt_required
     def get(self):
-        global open_weather
-        global zipcode
         url = 'http://api.openweathermap.org/data/2.5/weather?zip={}&units=imperial&appid={}'
-        r = requests.get(url.format(zipcode, open_weather)).json()
+        r = requests.get(url.format(location['zipcode'], open_weather)).json()
 
         weather_data = {
             'city': r['name'],
-            'zipcode': zipcode,
             'temperature': r['main']['temp'],
             'description': r['weather'][0]['description']
         }
@@ -123,13 +124,25 @@ class WeatherResource(Resource):
         }
 
 
+class Location(Resource):
+    @jwt_required
+    def get(self):
+        url = 'http://api.openweathermap.org/data/2.5/weather?zip={}&units=imperial&appid={}'
+        r = requests.get(url.format(location['zipcode'], open_weather)).json()
+        location['city'] = r['name']
+        location['country'] = r['sys']['country']
+
+        return location
+
+
 class ZipCodeEntry(Resource):
     @jwt_required
     def post(self):
+        # todo: check that zipcode is valid
         data = zip_parser.parse_args()
-        global zipcode
-        zipcode = data['zipcode']
-        return {"zip entered": zipcode}
+        # global location
+        location['zipcode'] = data['zipcode']
+        return {"zip entered": location['zipcode']}
 
 
 class TokenRefresh(Resource):
