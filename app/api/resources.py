@@ -12,15 +12,10 @@ parser.add_argument('username', help = 'This field cannot be blank', required = 
 parser.add_argument('password', help = 'This field cannot be blank', required = True)
 
 zip_parser = reqparse.RequestParser()
-zip_parser.add_argument('zipcode', help = 'This field cannot be blank', required = True)
+zip_parser.add_argument('zipcode', help = 'This field cannot be blank', required = False)
 
 # Global variables
 open_weather = environ.get('OPEN_WEATHER_KEY')
-location = {
-    'zipcode': '98101',
-    'city': 'Seattle',
-    'country': 'US'
-}
 
 
 class UserRegistration(Resource):
@@ -108,71 +103,67 @@ class AllUsers(Resource):
 class WeatherResource(Resource):
     @jwt_required
     def get(self):
-        url = 'http://api.openweathermap.org/data/2.5/weather?zip={}&units=imperial&appid={}'
-        r = requests.get(url.format(location['zipcode'], open_weather)).json()
+        data = zip_parser.parse_args()
 
-        weather_data = {
-            'temperature': r['main']['temp'],
-            'description': r['weather'][0]['description']
-        }
+        try:
+            zipcode = data['zipcode']
+            url = 'http://api.openweathermap.org/data/2.5/weather?zip={}&units=imperial&appid={}'
+            r = requests.get(url.format(zipcode, open_weather)).json()
 
-        weather_message = f"{weather_data['temperature']:.1f} degrees and {weather_data['description']}"
+            weather_data = {
+                'city': r['name'],
+                'temperature': r['main']['temp'],
+                'description': r['weather'][0]['description']
+            }
+            weather_message = f"{weather_data['temperature']:.1f} degrees and {weather_data['description']}"
 
-        return {
-            location['city']: weather_message
-        }
+            return {
+                weather_data['city']: weather_message
+            }
+        except:
+            return {
+                "error": "no information"
+            }
 
 
 class WeatherFiveDay(Resource):
     @jwt_required
     def get(self):
-        url = 'http://api.openweathermap.org/data/2.5/forecast?zip={}&units=imperial&appid={}'
-        r = requests.get(url.format(location['zipcode'], open_weather)).json()
-
-        five_day = {
-            "Day 1": {
-                'temperature': r['list'][0]['main']['temp'],
-                'description': r['list'][0]['weather'][0]['description']
-            },
-            "Day 2": {
-                'temperature': r['list'][1]['main']['temp'],
-                'description': r['list'][1]['weather'][0]['description']
-            },
-            "Day 3": {
-                'temperature': r['list'][2]['main']['temp'],
-                'description': r['list'][2]['weather'][0]['description']
-            },
-            "Day 4": {
-                'temperature': r['list'][3]['main']['temp'],
-                'description': r['list'][3]['weather'][0]['description']
-            },
-            "Day 5": {
-                'temperature': r['list'][4]['main']['temp'],
-                'description': r['list'][4]['weather'][0]['description']
-            }
-        }
-
-        return five_day
-
-
-class Location(Resource):
-    @jwt_required
-    def get(self):
-        url = 'http://api.openweathermap.org/data/2.5/weather?zip={}&units=imperial&appid={}'
-        r = requests.get(url.format(location['zipcode'], open_weather)).json()
-        location['city'] = r['name']
-        location['country'] = r['sys']['country']
-
-        return location
-
-
-class ZipCodeEntry(Resource):
-    @jwt_required
-    def post(self):
-        # todo: check that zipcode is valid
         data = zip_parser.parse_args()
-        location['zipcode'] = data['zipcode']
-        return {'zip entered': location['zipcode']}
+
+        try:
+            zipcode = data['zipcode']
+            url = 'http://api.openweathermap.org/data/2.5/forecast?zip={}&units=imperial&appid={}'
+            r = requests.get(url.format(zipcode, open_weather)).json()
+
+            five_day = {
+                "Day 1": {
+                    'temperature': r['list'][0]['main']['temp'],
+                    'description': r['list'][0]['weather'][0]['description']
+                },
+                "Day 2": {
+                    'temperature': r['list'][1]['main']['temp'],
+                    'description': r['list'][1]['weather'][0]['description']
+                },
+                "Day 3": {
+                    'temperature': r['list'][2]['main']['temp'],
+                    'description': r['list'][2]['weather'][0]['description']
+                },
+                "Day 4": {
+                    'temperature': r['list'][3]['main']['temp'],
+                    'description': r['list'][3]['weather'][0]['description']
+                },
+                "Day 5": {
+                    'temperature': r['list'][4]['main']['temp'],
+                    'description': r['list'][4]['weather'][0]['description']
+                }
+            }
+
+            return five_day
+        except:
+            return{
+                "error": "no information"
+            }
 
 
 class TokenRefresh(Resource):
