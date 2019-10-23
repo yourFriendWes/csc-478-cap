@@ -2,10 +2,12 @@ from flask import Flask
 from flask_jwt_extended import JWTManager
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
+from dotenv import load_dotenv
 
 
 app = Flask(__name__)
 api = Api(app)
+load_dotenv()
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -38,3 +40,6 @@ api.add_resource(resources.UserLogoutRefresh, '/logout/refresh')
 api.add_resource(resources.TokenRefresh, '/token/refresh')
 api.add_resource(resources.AllUsers, '/users')
 api.add_resource(resources.WeatherResource, '/weather')
+api.add_resource(resources.ZipCodeEntry, '/zipcode')
+api.add_resource(resources.Location, '/location')
+api.add_resource(resources.WeatherFiveDay, '/fiveday')

@@ -6,3 +6,5 @@ flask-jwt-extended
 gunicorn
 passlib
 flask-sqlalchemy
+requests
+python-dotenv
