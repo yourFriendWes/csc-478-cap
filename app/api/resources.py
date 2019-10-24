@@ -143,11 +143,15 @@ class WeatherFiveDay(Resource):
             index = 0
             for item in r['list']:
                 day = "Item " + str(index + 1)
+
                 time_epoch = r['list'][index]['dt']
                 time_datetime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time_epoch))
+
+                temp = r['list'][index]['main']['temp']
+
                 details = {
                     'time': time_datetime,
-                    'temperature': r['list'][index]['main']['temp'],
+                    'temperature': f'{temp:.1f} degrees',
                     'description': r['list'][index]['weather'][0]['description']
                 }
                 five_day[day] = details
