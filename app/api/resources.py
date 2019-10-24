@@ -5,6 +5,7 @@ from flask_restful import Resource, reqparse
 from app.api.models import RevokedTokenModel, UserModel
 
 import requests
+import time
 from os import environ
 
 parser = reqparse.RequestParser()
@@ -14,7 +15,7 @@ parser.add_argument('password', help = 'This field cannot be blank', required = 
 zip_parser = reqparse.RequestParser()
 zip_parser.add_argument('zipcode', help = 'This field cannot be blank', required = False)
 
-# Global variables
+# Config variables
 open_weather = environ.get('OPEN_WEATHER_KEY')
 
 
@@ -136,30 +137,24 @@ class WeatherFiveDay(Resource):
             url = 'http://api.openweathermap.org/data/2.5/forecast?zip={}&units=imperial&appid={}'
             r = requests.get(url.format(zipcode, open_weather)).json()
 
-            five_day = {
-                "Day 1": {
-                    'temperature': r['list'][0]['main']['temp'],
-                    'description': r['list'][0]['weather'][0]['description']
-                },
-                "Day 2": {
-                    'temperature': r['list'][1]['main']['temp'],
-                    'description': r['list'][1]['weather'][0]['description']
-                },
-                "Day 3": {
-                    'temperature': r['list'][2]['main']['temp'],
-                    'description': r['list'][2]['weather'][0]['description']
-                },
-                "Day 4": {
-                    'temperature': r['list'][3]['main']['temp'],
-                    'description': r['list'][3]['weather'][0]['description']
-                },
-                "Day 5": {
-                    'temperature': r['list'][4]['main']['temp'],
-                    'description': r['list'][4]['weather'][0]['description']
+            # returns a list of weather information for every 3 hours for the next five days
+
+            five_day = {}
+            index = 0
+            for item in r['list']:
+                day = "Item " + str(index + 1)
+                time_epoch = r['list'][index]['dt']
+                time_datetime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time_epoch))
+                details = {
+                    'time': time_datetime,
+                    'temperature': r['list'][index]['main']['temp'],
+                    'description': r['list'][index]['weather'][0]['description']
                 }
-            }
+                five_day[day] = details
+                index += 1
 
             return five_day
+
         except:
             return{
                 "error": "no information"
