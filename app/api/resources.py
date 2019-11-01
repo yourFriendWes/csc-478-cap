@@ -111,16 +111,17 @@ class WeatherResource(Resource):
             url = 'http://api.openweathermap.org/data/2.5/weather?zip={}&units=imperial&appid={}'
             r = requests.get(url.format(zipcode, open_weather)).json()
 
+            time_epoch = r['dt']
+            time_datetime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time_epoch))
+
             weather_data = {
                 'city': r['name'],
+                'date': time_datetime,
                 'temperature': r['main']['temp'],
                 'description': r['weather'][0]['description']
             }
-            weather_message = f"{weather_data['temperature']:.1f} degrees and {weather_data['description']}"
+            return weather_data
 
-            return {
-                weather_data['city']: weather_message
-            }
         except:
             return {
                 "error": "no information"
