@@ -138,25 +138,18 @@ class WeatherFiveDay(Resource):
             url = 'http://api.openweathermap.org/data/2.5/forecast?zip={}&units=imperial&appid={}'
             r = requests.get(url.format(zipcode, open_weather)).json()
 
-            # returns a list of weather information for every 3 hours for the next five days
-
-            five_day = {}
-            index = 0
+            five_day = []
             for item in r['list']:
-
-                time_epoch = r['list'][index]['dt']
+                time_epoch = item['dt']
                 time_datetime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time_epoch))
 
-                temp = r['list'][index]['main']['temp']
-
                 details = {
-                    # 'time': time_datetime,
-                    'temperature': f'{temp:.1f} degrees',
-                    'description': r['list'][index]['weather'][0]['description']
+                    'city': r['city']['name'],
+                    'time': time_datetime,
+                    'temperature': item['main']['temp'],
+                    'description': item['weather'][0]['description']
                 }
-                five_day[time_datetime] = details
-                index += 1
-
+                five_day.append(details)
             return five_day
 
         except:
