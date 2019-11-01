@@ -17,6 +17,7 @@ zip_parser.add_argument('zipcode', help = 'This field cannot be blank', required
 
 # Config variables
 open_weather = environ.get('OPEN_WEATHER_KEY')
+zomato = environ.get('ZOMATO_KEY')
 
 
 class UserRegistration(Resource):
@@ -164,9 +165,89 @@ class WeatherFiveDay(Resource):
             }
 
 
+class RestaurantResource(Resource):
+    @jwt_required
+    def get(self):
+        data = zip_parser.parse_args()
+        zipcode = data['zipcode']
+
+        # get city from open weather
+        city_details = get_city_details(zipcode=zipcode)
+
+        # get zomato's city id
+        city_loc_info = self.get_city_id(city_details=city_details)
+
+        try:
+            # get list of restaurants from zomato with city id
+            url = 'https://developers.zomato.com/api/v2.1/search'
+            query_string = {
+                'entity_id': city_loc_info['city_id'],
+                'entity_type': city_loc_info['type']
+            }
+            headers = {
+                'user-key': zomato
+            }
+            response = requests.request("GET", url, headers=headers, params=query_string).json()
+
+            restaurant_list = []
+            index = 0
+            for item in response['restaurants']:
+
+                restaurant = {
+                    'name': response['restaurants'][index]['restaurant']['name'],
+                    'address': response['restaurants'][index]['restaurant']['location']['address'],
+                    'phone': response['restaurants'][index]['restaurant']['phone_numbers'],
+                    'cuisine': response['restaurants'][index]['restaurant']['cuisines'],
+                    'price_scale': response['restaurants'][index]['restaurant']['price_range'],
+                    'rating': response['restaurants'][index]['restaurant']['user_rating']['aggregate_rating']
+                }
+
+                restaurant_list.append(restaurant)
+                index += 1
+            return restaurant_list
+
+        except:
+            return {"error": "no info from restaurant resource"}
+
+    def get_city_id(self, city_details):
+        url = 'https://developers.zomato.com/api/v2.1/locations'
+        querystring = {
+            'query': city_details['city'],
+            'lat': city_details['lat'],
+            'lon': city_details['lon']
+        }
+        headers = {
+            'user-key': zomato
+        }
+        try:
+            response = requests.request("GET", url, headers=headers, params=querystring).json()
+
+            city_info = {
+                'city_id': response['location_suggestions'][0]['entity_id'],
+                'type': response['location_suggestions'][0]['entity_type']
+            }
+            return city_info
+        except:
+            return {"error": "no info from get_city_id"}
+
+
 class TokenRefresh(Resource):
     @jwt_refresh_token_required
     def post(self):
         current_user = get_jwt_identity()
         access_token = create_access_token(identity = current_user)
         return {'access_token': access_token}
+
+
+def get_city_details(zipcode):
+    url = 'http://api.openweathermap.org/data/2.5/weather?zip={}&units=imperial&appid={}'
+    try:
+        r = requests.get(url.format(zipcode, open_weather)).json()
+        city_details = {
+            'city': r['name'],
+            'lat': r['coord']['lat'],
+            'lon': r['coord']['lon']
+        }
+        return city_details
+    except:
+        return {"error": "no info from get_city_details"}
