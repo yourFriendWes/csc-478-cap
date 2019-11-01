@@ -190,20 +190,20 @@ class RestaurantResource(Resource):
             response = requests.request("GET", url, headers=headers, params=query_string).json()
 
             restaurant_list = []
-            index = 0
+
             for item in response['restaurants']:
 
                 restaurant = {
-                    'name': response['restaurants'][index]['restaurant']['name'],
-                    'address': response['restaurants'][index]['restaurant']['location']['address'],
-                    'phone': response['restaurants'][index]['restaurant']['phone_numbers'],
-                    'cuisine': response['restaurants'][index]['restaurant']['cuisines'],
-                    'price_scale': response['restaurants'][index]['restaurant']['price_range'],
-                    'rating': response['restaurants'][index]['restaurant']['user_rating']['aggregate_rating']
+                    'name': item['restaurant']['name'],
+                    'address': item['restaurant']['location']['address'],
+                    'phone': item['restaurant']['phone_numbers'],
+                    'cuisine': item['restaurant']['cuisines'],
+                    'price_scale': item['restaurant']['price_range'],
+                    'rating': item['restaurant']['user_rating']['aggregate_rating']
                 }
 
                 restaurant_list.append(restaurant)
-                index += 1
+
             return restaurant_list
 
         except:
