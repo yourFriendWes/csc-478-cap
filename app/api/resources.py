@@ -2,6 +2,7 @@ from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 get_jwt_identity, get_raw_jwt,
                                 jwt_refresh_token_required, jwt_required)
 from flask_restful import Resource, reqparse
+from flask import request
 from app.api.models import RevokedTokenModel, UserModel
 
 import requests
@@ -157,7 +158,21 @@ class WeatherFiveDay(Resource):
             return{
                 "error": "no information"
             }
+          
 
+class LocationByIp(Resource):
+    @jwt_required
+    def get(self):
+        try:
+            ip_address = request.remote_addr
+            response = requests.get("http://ip-api.com/json/{}".format(ip_address))
+            js = response.json()
+            location['city'] = js['city']
+            location['country'] = js['country']
+            location['zipcode'] = js['zip']
+            return location
+        except Exception as e:
+            return 'Unknown location'
 
 class RestaurantResource(Resource):
     @jwt_required
