@@ -19,7 +19,7 @@ zip_parser.add_argument('zipcode', required = False)
 # Config variables
 open_weather = environ.get('OPEN_WEATHER_KEY')
 zomato = environ.get('ZOMATO_KEY')
-event_brite = environ.get('EVENTBRITE_KEY')
+ticketmaster = environ.get('TICKETMASTER_KEY')
 
 
 class UserRegistration(Resource):
@@ -161,19 +161,19 @@ class WeatherFiveDay(Resource):
             }
           
 
-class LocationByIp(Resource):
-    @jwt_required
-    def get(self):
-        try:
-            ip_address = request.remote_addr
-            response = requests.get("http://ip-api.com/json/{}".format(ip_address))
-            js = response.json()
-            location['city'] = js['city']
-            location['country'] = js['country']
-            location['zipcode'] = js['zip']
-            return location
-        except Exception as e:
-            return 'Unknown location'
+# class LocationByIp(Resource):
+#     @jwt_required
+#     def get(self):
+#         try:
+#             ip_address = request.remote_addr
+#             response = requests.get("http://ip-api.com/json/{}".format(ip_address))
+#             js = response.json()
+#             location['city'] = js['city']
+#             location['country'] = js['country']
+#             location['zipcode'] = js['zip']
+#             return location
+#         except Exception as e:
+#             return 'Unknown location'
 
 class RestaurantResource(Resource):
     @jwt_required
@@ -216,14 +216,6 @@ class RestaurantResource(Resource):
         except:
             return {"error": "no info from restaurant resource"}
 
-
-class EventResource(Resource):
-    @jwt_required
-    def get(self):
-        data = zip_parser.parse_args()
-        zipcode = data['zipcode']
-
-
     def get_city_id(self, city_details):
         url = 'https://developers.zomato.com/api/v2.1/locations'
         querystring = {
@@ -244,6 +236,47 @@ class EventResource(Resource):
             return city_info
         except:
             return {"error": "no info from get_city_id"}
+
+
+class EventResource(Resource):
+    @jwt_required
+    def get(self):
+        data = zip_parser.parse_args()
+        zipcode = data['zipcode']
+
+        try:
+            url = 'https://app.ticketmaster.com/discovery/v2/events'
+            query_string = {
+                'apikey': ticketmaster,
+                'postalCode': zipcode
+            }
+
+            event_list = []
+            response = requests.request("GET", url, params=query_string).json()
+            for item in response['_embedded']['events']:
+                classifications = []
+
+                for classification in item['classifications']:
+                    class_type = classification['segment']['name']
+                    genre = classification['genre']['name']
+                    subgenre = classification['subGenre']['name']
+
+                classifications.append(class_type)
+                classifications.append(genre)
+                classifications.append(subgenre)
+
+                event = {
+                    'name': item['name'],
+                    'date': item['dates']['start']['localDate'],
+                    'classifications': classifications,
+                    'venue': item['_embedded']['venues'][0]['name'],
+                    'address': item['_embedded']['venues'][0]['address']['line1']
+                }
+                event_list.append(event)
+            return event_list
+
+        except:
+            return {'error': 'no info found'}
 
 
 class TokenRefresh(Resource):
