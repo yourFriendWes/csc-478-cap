@@ -18,6 +18,7 @@ zip_parser.add_argument('zipcode', help = 'This field cannot be blank', required
 # Config variables
 open_weather = environ.get('OPEN_WEATHER_KEY')
 zomato = environ.get('ZOMATO_KEY')
+event_brite = environ.get('EVENTBRITE_KEY')
 
 
 class UserRegistration(Resource):
@@ -186,7 +187,6 @@ class RestaurantResource(Resource):
             restaurant_list = []
 
             for item in response['restaurants']:
-
                 restaurant = {
                     'name': item['restaurant']['name'],
                     'address': item['restaurant']['location']['address'],
@@ -195,13 +195,19 @@ class RestaurantResource(Resource):
                     'price_scale': item['restaurant']['price_range'],
                     'rating': item['restaurant']['user_rating']['aggregate_rating']
                 }
-
                 restaurant_list.append(restaurant)
-
             return restaurant_list
 
         except:
             return {"error": "no info from restaurant resource"}
+
+
+class EventResource(Resource):
+    @jwt_required
+    def get(self):
+        data = zip_parser.parse_args()
+        zipcode = data['zipcode']
+
 
     def get_city_id(self, city_details):
         url = 'https://developers.zomato.com/api/v2.1/locations'
