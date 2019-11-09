@@ -20,6 +20,7 @@ zip_parser.add_argument('zipcode', required = False)
 open_weather = environ.get('OPEN_WEATHER_KEY')
 zomato = environ.get('ZOMATO_KEY')
 ticketmaster = environ.get('TICKETMASTER_KEY')
+opentrip = environ.get('OPENTRIP_KEY')
 
 
 class UserRegistration(Resource):
@@ -277,6 +278,69 @@ class EventResource(Resource):
 
         except:
             return {'error': 'no info found'}
+
+
+class HotelResource(Resource):
+    @jwt_required
+    def get(self):
+        data = zip_parser.parse_args()
+        zipcode = data['zipcode']
+
+        # get city name and lat long from open weather
+        city_details = get_city_details(zipcode)
+
+        try:
+            url = 'https://api.opentripmap.com/0.1/en/places/radius'
+            query_string = {
+                # 15 miles is 24140 meters
+                'radius': 24140,
+                'lon': city_details['lon'],
+                'lat': city_details['lat'],
+                'kinds': 'accomodations',
+                'apikey': opentrip
+            }
+            hotel_list = []
+            response = requests.request("GET", url, params=query_string).json()
+
+            for item in response['features']:
+                hotel = {
+                    'name': item['properties']['name'],
+                    'rating': item['properties']['rate'],
+                    # xid is unique identifier for an object in open trip map
+                    'xid': item['properties']['xid']
+                }
+
+                hotel_list.append(hotel)
+
+            return hotel_list
+        except:
+            return {'error': 'no info found'}
+
+
+class HotelInfo(Resource):
+    @jwt_required
+    def get(self):
+        hotel_id_parser = reqparse.RequestParser()
+        hotel_id_parser.add_argument('xid', help='This field cannot be blank', required=True)
+
+        data = hotel_id_parser.parse_args()
+        hotel_id = data['xid']
+
+        try:
+            url = f"https://api.opentripmap.com/0.1/en/places/xid/{hotel_id}"
+            query_string = {
+                'apikey': opentrip
+            }
+            response = requests.request("GET", url, params=query_string).json()
+            hotel_info = {
+                'house_number': response['address']['house_number'],
+                'street': response['address']['road'],
+                'city': response['address']['city'],
+            }
+
+            return hotel_info
+        except:
+            return {'error': 'no info'}
 
 
 class TokenRefresh(Resource):
