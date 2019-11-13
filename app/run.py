@@ -10,7 +10,9 @@ app = Flask(__name__)
 api = Api(app)
 load_dotenv()
 
-app.config.from_object(os.environ['APP_SETTINGS'])
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = 'some-secret-string'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 
 db = SQLAlchemy()
 db.init_app(app)
