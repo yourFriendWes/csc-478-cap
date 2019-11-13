@@ -19,6 +19,8 @@ zip_parser.add_argument('zipcode', required = False)
 # Config variables
 open_weather = environ.get('OPEN_WEATHER_KEY')
 zomato = environ.get('ZOMATO_KEY')
+ticketmaster = environ.get('TICKETMASTER_KEY')
+opentrip = environ.get('OPENTRIP_KEY')
 
 
 class UserRegistration(Resource):
@@ -110,17 +112,22 @@ class WeatherResource(Resource):
 
         try:
             zipcode = data['zipcode']
-            url = 'http://api.openweathermap.org/data/2.5/weather?zip={}&units=imperial&appid={}'
-            r = requests.get(url.format(zipcode, open_weather)).json()
+            url = 'http://api.openweathermap.org/data/2.5/weather'
+            query_string = {
+                'zip': zipcode,
+                'units': 'imperial',
+                'appid': open_weather
+            }
+            response = requests.request("GET", url, params=query_string).json()
 
-            time_epoch = r['dt']
+            time_epoch = response['dt']
             time_datetime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time_epoch))
 
             weather_data = {
-                'city': r['name'],
+                'city': response['name'],
                 'date': time_datetime,
-                'temperature': r['main']['temp'],
-                'description': r['weather'][0]['description']
+                'temperature': response['main']['temp'],
+                'description': response['weather'][0]['description']
             }
             return weather_data
 
@@ -130,23 +137,28 @@ class WeatherResource(Resource):
             }
 
 
-class WeatherFiveDay(Resource):
+class WeatherFiveDayResource(Resource):
     @jwt_required
     def get(self):
         data = zip_parser.parse_args()
 
         try:
             zipcode = data['zipcode']
-            url = 'http://api.openweathermap.org/data/2.5/forecast?zip={}&units=imperial&appid={}'
-            r = requests.get(url.format(zipcode, open_weather)).json()
+            url = 'http://api.openweathermap.org/data/2.5/forecast'
+            query_string = {
+                'zip': zipcode,
+                'units': 'imperial',
+                'appid': open_weather
+            }
+            response = requests.request("GET", url, params=query_string).json()
 
             five_day = []
-            for item in r['list']:
+            for item in response['list']:
                 time_epoch = item['dt']
                 time_datetime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time_epoch))
 
                 details = {
-                    'city': r['city']['name'],
+                    'city': response['city']['name'],
                     'time': time_datetime,
                     'temperature': item['main']['temp'],
                     'description': item['weather'][0]['description']
@@ -173,6 +185,7 @@ class LocationByIp(Resource):
             return location
         except Exception as e:
             return 'Unknown location'
+
 
 class RestaurantResource(Resource):
     @jwt_required
@@ -201,7 +214,6 @@ class RestaurantResource(Resource):
             restaurant_list = []
 
             for item in response['restaurants']:
-
                 restaurant = {
                     'name': item['restaurant']['name'],
                     'address': item['restaurant']['location']['address'],
@@ -210,13 +222,11 @@ class RestaurantResource(Resource):
                     'price_scale': item['restaurant']['price_range'],
                     'rating': item['restaurant']['user_rating']['aggregate_rating']
                 }
-
                 restaurant_list.append(restaurant)
-
             return restaurant_list
 
         except:
-            return {"error": "no info from restaurant resource"}
+            return {"error": "no info"}
 
     def get_city_id(self, city_details):
         url = 'https://developers.zomato.com/api/v2.1/locations'
@@ -237,7 +247,111 @@ class RestaurantResource(Resource):
             }
             return city_info
         except:
-            return {"error": "no info from get_city_id"}
+            return {"error": "no info from get_city_id()"}
+
+
+class EventResource(Resource):
+    @jwt_required
+    def get(self):
+        data = zip_parser.parse_args()
+        zipcode = data['zipcode']
+
+        try:
+            url = 'https://app.ticketmaster.com/discovery/v2/events'
+            query_string = {
+                'apikey': ticketmaster,
+                'postalCode': zipcode
+            }
+
+            event_list = []
+            response = requests.request("GET", url, params=query_string).json()
+            for item in response['_embedded']['events']:
+                classifications = []
+
+                for classification in item['classifications']:
+                    class_type = classification['segment']['name']
+                    genre = classification['genre']['name']
+                    subgenre = classification['subGenre']['name']
+
+                classifications.append(class_type)
+                classifications.append(genre)
+                classifications.append(subgenre)
+
+                event = {
+                    'name': item['name'],
+                    'date': item['dates']['start']['localDate'],
+                    'classifications': classifications,
+                    'venue': item['_embedded']['venues'][0]['name'],
+                    'address': item['_embedded']['venues'][0]['address']['line1']
+                }
+                event_list.append(event)
+            return event_list
+
+        except:
+            return {'error': 'no info found'}
+
+
+class HotelResource(Resource):
+    @jwt_required
+    def get(self):
+        data = zip_parser.parse_args()
+        zipcode = data['zipcode']
+
+        # get city name and lat long from open weather
+        city_details = get_city_details(zipcode)
+
+        try:
+            url = 'https://api.opentripmap.com/0.1/en/places/radius'
+            query_string = {
+                # 15 miles is 24140 meters
+                'radius': 24140,
+                'lon': city_details['lon'],
+                'lat': city_details['lat'],
+                'kinds': 'accomodations',
+                'apikey': opentrip
+            }
+            hotel_list = []
+            response = requests.request("GET", url, params=query_string).json()
+
+            for item in response['features']:
+                hotel = {
+                    'name': item['properties']['name'],
+                    'rating': item['properties']['rate'],
+                    # xid is unique identifier for an object in open trip map
+                    'xid': item['properties']['xid']
+                }
+
+                hotel_list.append(hotel)
+
+            return hotel_list
+        except:
+            return {'error': 'no info found'}
+
+
+class HotelInfoResource(Resource):
+    @jwt_required
+    def get(self):
+        hotel_id_parser = reqparse.RequestParser()
+        hotel_id_parser.add_argument('xid', help='This field cannot be blank', required=True)
+
+        data = hotel_id_parser.parse_args()
+        hotel_id = data['xid']
+
+        try:
+            url = f"https://api.opentripmap.com/0.1/en/places/xid/{hotel_id}"
+            query_string = {
+                'apikey': opentrip
+            }
+            response = requests.request("GET", url, params=query_string).json()
+            hotel_info = {
+                'house_number': response['address']['house_number'],
+                'street': response['address']['road'],
+                'city': response['address']['city'],
+            }
+
+            return hotel_info
+        except:
+            return {'error': 'no info'}
 
 
 class TokenRefresh(Resource):
@@ -249,14 +363,19 @@ class TokenRefresh(Resource):
 
 
 def get_city_details(zipcode):
-    url = 'http://api.openweathermap.org/data/2.5/weather?zip={}&units=imperial&appid={}'
+    url = 'http://api.openweathermap.org/data/2.5/weather'
+    query_string = {
+        'zip': zipcode,
+        'units': 'imperial',
+        'appid': open_weather
+    }
     try:
-        r = requests.get(url.format(zipcode, open_weather)).json()
+        response = requests.request("GET", url, params=query_string).json()
         city_details = {
-            'city': r['name'],
-            'lat': r['coord']['lat'],
-            'lon': r['coord']['lon']
+            'city': response['name'],
+            'lat': response['coord']['lat'],
+            'lon': response['coord']['lon']
         }
         return city_details
     except:
-        return {"error": "no info from get_city_details"}
+        return {"error": "no info from get_city_details()"}
