@@ -5,7 +5,8 @@ flask-restful
 flask-jwt-extended
 gunicorn
 passlib
-flask-sqlalchemy
+Flask-SQLAlchemy
+SQLAlchemy
 requests
 python-dotenv
 psycopg2-binary

@@ -12,7 +12,8 @@ load_dotenv()
 
 app.config.from_object(os.environ['APP_SETTINGS'])
 
-db = SQLAlchemy(app)
+db = SQLAlchemy()
+db.init_app(app)
 
 from app.api import models, resources, views
 
