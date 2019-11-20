@@ -1,19 +1,21 @@
+import os
+import psycopg2
 from flask import Flask
 from flask_jwt_extended import JWTManager
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 
-
 app = Flask(__name__)
 api = Api(app)
 load_dotenv()
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'some-secret-string'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 
-db = SQLAlchemy(app)
+db = SQLAlchemy()
+db.init_app(app)
 
 from app.api import models, resources, views
 
@@ -40,5 +42,8 @@ api.add_resource(resources.UserLogoutRefresh, '/logout/refresh')
 api.add_resource(resources.TokenRefresh, '/token/refresh')
 api.add_resource(resources.AllUsers, '/users')
 api.add_resource(resources.WeatherResource, '/weather')
-api.add_resource(resources.WeatherFiveDay, '/fiveday')
-api.add_resource(resources.RestaurantResource, '/restaurant')
+api.add_resource(resources.WeatherFiveDayResource, '/fiveday')
+api.add_resource(resources.RestaurantResource, '/restaurants')
+api.add_resource(resources.EventResource, '/events')
+api.add_resource(resources.HotelResource, '/hotels')
+api.add_resource(resources.HotelInfoResource, '/hotel')
