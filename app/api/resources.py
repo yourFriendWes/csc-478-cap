@@ -178,6 +178,7 @@ class WeatherFiveDayResource(Resource):
             }
 
 
+
 class RestaurantResource(Resource):
     @jwt_required
     def get(self):
