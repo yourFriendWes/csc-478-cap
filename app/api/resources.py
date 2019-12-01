@@ -112,6 +112,12 @@ class WeatherResource(Resource):
 
         try:
             zipcode = data['zipcode']
+            if zipcode == None:
+                try:
+                    location = get_location_by_ip()
+                    zipcode = location['zipcode']
+                except:
+                    return location["error"]
             url = 'http://api.openweathermap.org/data/2.5/weather'
             query_string = {
                 'zip': zipcode,
@@ -170,21 +176,7 @@ class WeatherFiveDayResource(Resource):
             return{
                 "error": "no information"
             }
-          
 
-class LocationByIp(Resource):
-    @jwt_required
-    def get(self):
-        try:
-            ip_address = request.remote_addr
-            response = requests.get("http://ip-api.com/json/{}".format(ip_address))
-            js = response.json()
-            location['city'] = js['city']
-            location['country'] = js['country']
-            location['zipcode'] = js['zip']
-            return location
-        except Exception as e:
-            return 'Unknown location'
 
 
 class RestaurantResource(Resource):
@@ -378,4 +370,21 @@ def get_city_details(zipcode):
         }
         return city_details
     except:
-        return {"error": "no info from get_city_details()"}
+        return {"error": "no info from get_city_details"}
+
+def get_location_by_ip():
+    try:
+        ip_address = request.remote_addr
+        response = requests.get("http://ip-api.com/json/{}".format(ip_address))
+        js = response.json()
+        location = {
+            'ipaddr': js['query'],
+            'city': js['city'],
+            'country': js['country'],
+            'zipcode': js['zip']
+        }
+        return location
+    except Exception as e:
+        return {
+            "error": "unknown location for IP: {0}".format(request.remote_addr)
+        }
