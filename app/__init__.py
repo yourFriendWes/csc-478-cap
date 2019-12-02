@@ -5,9 +5,10 @@ from flask_jwt_extended import JWTManager
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
+from flask import jsonify
 
-def create_app():
-    app = Flask(__name__)
+def create_app(test_config=None):
+    app = Flask(__name__, instance_relative_config=True)
     api = Api(app)
     load_dotenv()
 
@@ -35,6 +36,9 @@ def create_app():
         jti = decrypted_token['jti']
         return models.RevokedTokenModel.is_jti_blacklisted(jti)
 
+    @app.route('/')
+    def index():
+        return jsonify({'message': "Let's try to travel with our experimental API"})
 
     api.add_resource(resources.UserRegistration, '/registration')
     api.add_resource(resources.UserLogin, '/login')
