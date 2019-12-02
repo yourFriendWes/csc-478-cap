@@ -3,7 +3,7 @@ from flask_jwt_extended import (create_access_token, create_refresh_token,
                                 jwt_refresh_token_required, jwt_required)
 from flask_restful import Resource, reqparse
 from flask import request
-from app.api.models import RevokedTokenModel, UserModel
+from app.models import RevokedTokenModel, UserModel
 
 import requests
 import time

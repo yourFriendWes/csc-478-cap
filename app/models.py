@@ -1,6 +1,6 @@
 from passlib.hash import pbkdf2_sha256 as sha256
 
-from app.run import db
+from app import db
 
 
 class UserModel(db.Model):
