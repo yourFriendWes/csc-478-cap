@@ -137,6 +137,7 @@ class WeatherResource(Resource):
             time_datetime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time_epoch))
 
             weather_data = {
+                'ipaddrs': location['ipaddrs'],
                 'city': response['name'],
                 'date': time_datetime,
                 'temperature': response['main']['temp'],
@@ -431,7 +432,7 @@ def get_location_by_ip():
     Requirement 3.2.1: Find location by user IP address
     """
     try:
-        ip_address = ''
+        ip_address, ip_addrs = ''
         if 'HTTP_X_FORWARDED_FOR' in request.environ:
             ip_addrs = ip_address.split(',')
             ip_address = ip_addrs[len(ip_addrs)-1]
@@ -440,6 +441,7 @@ def get_location_by_ip():
         response = requests.get("http://ip-api.com/json/{}".format(ip_address))
         js = response.json()
         location = {
+            'ipaddrs': ip_addrs,
             'ipaddr': js['query'],
             'city': js['city'],
             'country': js['country'],
