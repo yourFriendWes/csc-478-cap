@@ -4,6 +4,9 @@ from app.run import db
 
 
 class UserModel(db.Model):
+    """
+    Requirement 3.3.1: User data stored in database with encrypted password
+    """
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key = True)
