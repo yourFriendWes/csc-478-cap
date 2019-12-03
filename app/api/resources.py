@@ -431,7 +431,12 @@ def get_location_by_ip():
     Requirement 3.2.1: Find location by user IP address
     """
     try:
-        ip_address = request.remote_addr
+        ip_address = ''
+        if 'HTTP_X_FORWARDED_FOR' in request.environ:
+            ip_addrs = request.environ['HTTP_X_FORWARDED_FOR'].split(',')
+            ip_address = ip_addrs[len(ip_addrs)-1]
+        else:
+            ip_address = request.remote_addr
         response = requests.get("http://ip-api.com/json/{}".format(ip_address))
         js = response.json()
         location = {
