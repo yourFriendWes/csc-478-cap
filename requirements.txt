@@ -10,3 +10,4 @@ SQLAlchemy
 requests
 python-dotenv
 psycopg2-binary
+flask_swagger_ui

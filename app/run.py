@@ -1,5 +1,6 @@
 import os
 import psycopg2
+from flask_swagger_ui import get_swaggerui_blueprint
 from flask import Flask
 from flask_jwt_extended import JWTManager
 from flask_restful import Api
@@ -7,6 +8,19 @@ from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 
 app = Flask(__name__)
+
+### Initialize Swagger component ###
+SWAGGER_URL = '/swagger'
+API_URL = '/static/swagger.yml'
+SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(
+    SWAGGER_URL,
+    API_URL,
+    config={
+        'app_name': "trippyapi"
+    }
+)
+app.register_blueprint(SWAGGERUI_BLUEPRINT, url_prefix=SWAGGER_URL)
+
 api = Api(app)
 load_dotenv()
 
