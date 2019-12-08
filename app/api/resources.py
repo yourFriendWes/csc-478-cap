@@ -110,9 +110,6 @@ class AllUsers(Resource):
     def get(self):
         return UserModel.return_all()
 
-    def delete(self):
-        return UserModel.delete_all()
-
 
 class WeatherResource(Resource):
     """
