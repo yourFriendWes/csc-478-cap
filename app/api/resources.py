@@ -11,8 +11,8 @@ from os import environ
 
 # Argument Parsers
 parser = reqparse.RequestParser()
-parser.add_argument('username', help='This field cannot be blank', required=True)
-parser.add_argument('password', help='This field cannot be blank', required=True)
+parser.add_argument('username', help='This field cannot be blank', required=True)   # Requirement 6.1.0
+parser.add_argument('password', help='This field cannot be blank', required=True)   # Requirement 6.2.0
 
 zip_parser = reqparse.RequestParser()
 zip_parser.add_argument('zipcode', required=False)
@@ -26,19 +26,22 @@ opentrip = environ.get('OPENTRIP_KEY')
 
 class UserRegistration(Resource):
     """
-    Requirement 3.3.1: User must register with unique name and password
+    Requirement 6.0.0: User registers with unique name and password
     """
     def post(self):
         data = parser.parse_args()
 
+        # Requirements 6.1.1 and 6.1.2: unique username
         if UserModel.find_by_username(data['username']):
             return {'message': 'User {} already exists'.format(data['username'])}
 
+        # Requirement 6.2.1: encrypts password
         new_user = UserModel(
             username=data['username'],
             password=UserModel.generate_hash(data['password'])
         )
 
+        # Requirement 6.3.0: stores user in database
         try:
             new_user.save_to_db()
             access_token = create_access_token(identity=data['username'])
@@ -54,23 +57,27 @@ class UserRegistration(Resource):
 
 class UserLogin(Resource):
     """
-    Requirement 3.3.2 and 3.3.3: User must login to generate access token
+    Requirement 7.0.0 and 8.0.0: User must login to generate access token
     """
     def post(self):
         data = parser.parse_args()
         current_user = UserModel.find_by_username(data['username'])
 
+        # Requirement 7.1.0: informs user of invalid credentials
         if not current_user:
             return {'message': 'User {} doesn\'t exist'.format(data['username'])}
 
         if UserModel.verify_hash(data['password'], current_user.password):
-            access_token = create_access_token(identity = data['username'])
-            refresh_token = create_refresh_token(identity = data['username'])
+            access_token = create_access_token(identity=data['username'])
+            refresh_token = create_refresh_token(identity=data['username'])
+
+            # Requirement 8.0.0 and 8.2.1: successful login generates access token and refresh token
             return {
                 'message': 'Logged in as {}'.format(current_user.username),
                 'access_token': access_token,
                 'refresh_token': refresh_token
                 }
+        # Requirement 7.1.0: informs user of invalid credentials
         else:
             return {'message': 'Wrong credentials'}, 401
 
@@ -109,18 +116,20 @@ class AllUsers(Resource):
 
 class WeatherResource(Resource):
     """
-    Requirement 3.2.2: Provides information for local weather by IP lookup or zip code entry
+    Requirement 2.0.0: Provides information for local weather
     """
     @jwt_required
     def get(self):
         data = zip_parser.parse_args()
 
+        # Requirement 1.0.0: derives location from IP address
         if data['zipcode'] is None:
             try:
                 location = get_location_by_ip()
                 zipcode = str(location['zipcode'])
             except:
                 return location["error"]
+        # Requirement 1.1.0: location zip code is provided by user
         else:
             zipcode = str(data['zipcode'])
 
@@ -136,6 +145,7 @@ class WeatherResource(Resource):
             time_epoch = response['dt']
             time_datetime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time_epoch))
 
+            # Requirement 2.3.0: information returned contains temperature, description, and date
             weather_data = {
                 'city': response['name'],
                 'date': time_datetime,
@@ -143,24 +153,27 @@ class WeatherResource(Resource):
                 'description': response['weather'][0]['description']
             }
             return weather_data
+        # Requirement 1.2.0: informs user if no information was found
         except:
             return {"error": "No weather information found"}, 404
 
 
 class WeatherFiveDayResource(Resource):
     """
-    Requirement 3.2.2: Provides five day local weather forecast by IP lookup or zip code entry
+    Requirement 2.2.0: Provides five day local weather forecast
     """
     @jwt_required
     def get(self):
         data = zip_parser.parse_args()
 
+        # Requirement 1.0.0: derives location from IP address
         if data['zipcode'] is None:
             try:
                 location = get_location_by_ip()
                 zipcode = str(location['zipcode'])
             except:
                 return location["error"]
+        # Requirement 1.1.0: location zip code is provided by user
         else:
             zipcode = str(data['zipcode'])
 
@@ -178,6 +191,7 @@ class WeatherFiveDayResource(Resource):
                 time_epoch = item['dt']
                 time_datetime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time_epoch))
 
+                # Requirement 2.3.0: information returned contains temperature, description, and date
                 details = {
                     'city': response['city']['name'],
                     'time': time_datetime,
@@ -186,26 +200,27 @@ class WeatherFiveDayResource(Resource):
                 }
                 five_day.append(details)
             return five_day
-
+        # Requirement 1.2.0: informs user if no information was found
         except:
             return{"error": "No weather information found"}, 404
 
 
 class RestaurantResource(Resource):
     """
-    Requirement 3.2.3: Provides information on local restaurants by IP lookup or zip code entry
+    Requirement 3.0.0: Provides information on local restaurants by IP lookup or zip code entry
     """
     @jwt_required
     def get(self):
         data = zip_parser.parse_args()
 
+        # Requirement 1.0.0: derives location from IP address
         if data['zipcode'] is None:
             try:
                 location = get_location_by_ip()
                 zipcode = str(location['zipcode'])
             except:
                 return location["error"]
-
+        # Requirement 1.1.0: location zip code is provided by user
         else:
             zipcode = str(data['zipcode'])
 
@@ -229,6 +244,7 @@ class RestaurantResource(Resource):
 
             restaurant_list = []
 
+            # Requirement 3.1.0: information contains name, address, phone, price, cuisines, and rating
             for item in response['restaurants']:
                 restaurant = {
                     'name': item['restaurant']['name'],
@@ -240,7 +256,7 @@ class RestaurantResource(Resource):
                 }
                 restaurant_list.append(restaurant)
             return restaurant_list
-
+        # Requirement 1.2.0: informs user if no information was found
         except:
             return {"error": "No restaurant information found"}, 404
 
@@ -263,24 +279,27 @@ class RestaurantResource(Resource):
                 'type': response['location_suggestions'][0]['entity_type']
             }
             return city_info
+        # Requirement 1.2.0: informs user if no information was found
         except:
             return {"error": "no info from get_city_id()"}, 404
 
 
 class EventResource(Resource):
     """
-    Requirement 3.2.4: Provides information on local events by IP lookup or zip code entry
+    Requirement 4.0.0: Provides information on local events by IP lookup or zip code entry
     """
     @jwt_required
     def get(self):
         data = zip_parser.parse_args()
 
+        # Requirement 1.0.0: derives location from IP address
         if data['zipcode'] is None:
             try:
                 location = get_location_by_ip()
                 zipcode = str(location['zipcode'])
             except:
                 return location["error"]
+        # Requirement 1.1.0: location zip code is provided by user
         else:
             zipcode = str(data['zipcode'])
 
@@ -293,6 +312,8 @@ class EventResource(Resource):
 
             event_list = []
             response = requests.request("GET", url, params=query_string).json()
+
+            # Requirement 4.1.0: information contains name, address, type, and date
             for item in response['_embedded']['events']:
                 classifications = []
 
@@ -314,25 +335,27 @@ class EventResource(Resource):
                 }
                 event_list.append(event)
             return event_list
-
+        # Requirement 1.2.0: informs user if no information was found
         except:
             return {'error': 'No event information found'}, 404
 
 
 class HotelResource(Resource):
     """
-    Requirement 3.2.5: Provides information on local hotels by IP lookup or zip code entry
+    Requirement 5.0.0: Provides information on local hotels by IP lookup or zip code entry
     """
     @jwt_required
     def get(self):
         data = zip_parser.parse_args()
 
+        # Requirement 1.0.0: derives location from IP address
         if data['zipcode'] is None:
             try:
                 location = get_location_by_ip()
                 zipcode = str(location['zipcode'])
             except:
                 return location["error"]
+        # Requirement 1.1.0: location zip code is provided by user
         else:
             zipcode = str(data['zipcode'])
 
@@ -352,6 +375,7 @@ class HotelResource(Resource):
             hotel_list = []
             response = requests.request("GET", url, params=query_string).json()
 
+            # Requirement 5.1.0: information contains name and rating
             for item in response['features']:
                 hotel = {
                     'name': item['properties']['name'],
@@ -362,13 +386,14 @@ class HotelResource(Resource):
                 hotel_list.append(hotel)
 
             return hotel_list
+        # Requirement 1.2.0: informs user if no information was found
         except:
             return {'error': 'No hotel information found'}, 404
 
 
 class HotelInfoResource(Resource):
     """
-    Requirement 3.2.5: Provides information on a specified hotel
+    Requirement 5.0.0: Provides information on a specified hotel
     """
     @jwt_required
     def get(self):
@@ -384,6 +409,8 @@ class HotelInfoResource(Resource):
                 'apikey': opentrip
             }
             response = requests.request("GET", url, params=query_string).json()
+
+            # Requirement 5.1.0: information contains hotel address
             hotel_info = {
                 'house_number': response['address']['house_number'],
                 'street': response['address']['road'],
@@ -391,13 +418,14 @@ class HotelInfoResource(Resource):
             }
 
             return hotel_info
+        # Requirement 1.2.0: informs user if no information was found
         except:
             return {'error': 'No  hotel information found'}, 404
 
 
 class TokenRefresh(Resource):
     """
-    Requirement 3.3.3: Refresh token generates a new access token
+    Requirement 8.2.1: Refresh token generates a new access token
     """
     @jwt_refresh_token_required
     def post(self):
@@ -422,13 +450,14 @@ def get_city_details(zipcode):
             'lon': response['coord']['lon']
         }
         return city_details
+    # Requirement 1.2.0: informs user if no information was found
     except:
         return {"error": "no info from get_city_details"}, 404
 
 
 def get_location_by_ip():
     """
-    Requirement 3.2.1: Find location by user IP address
+    Requirement 1.0.0: Find location by user IP address
     """
     try:
         ip_address = ''
@@ -446,6 +475,7 @@ def get_location_by_ip():
             'zipcode': js['zip']
         }
         return location
+    # Requirement 1.2.0: informs user if no information was found
     except Exception as e:
         return {
             "error": "unknown location for IP: {0}".format(request.remote_addr)
