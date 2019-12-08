@@ -12,6 +12,42 @@ basePath: "/"
 
 # Paths supported by the run application
 paths:
+  /fiveday:
+    get:
+      operationId: "api.resources.WeatherFiveDayResource.get"
+      tags:
+        - "Weather"
+      summary: "Provides the upcoming five day weather information for a given location."
+      description: "Provides the upcoming five day weather information for a given location."
+      responses:
+        200:
+          description: "Successful request for weather"
+          schema:
+            $ref: '#/definitions/fiveday'
+  /hotel:
+    get:
+      operationId: "api.resources.HotelInfoResource.get"
+      tags:
+        - "Hotel"
+      summary: "Returns the address information for a given hotel"
+      description: "Returns the address information for a given hotel"
+      responses:
+        200:
+          description: "Successful request for hotel information"
+          schema:
+            $ref: '#/definitions/hotel'
+  /hotels:
+    get:
+      operationId: "api.resources.HotelResource.get"
+      tags:
+        - "Hotel"
+      summary: "Returns the name, rating, and identifying information for hotels in a given area"
+      description: "Returns the name, rating, and identifying information for hotels in a given area"
+      responses:
+        200:
+          description: "Successful request for hotels information"
+          schema:
+            $ref: '#/definitions/hotels'
   /users:
     get:
       operationId: "api.resources.AllUsers.get"
@@ -36,20 +72,9 @@ paths:
           description: "Successful request for weather"
           schema:
             $ref: '#/definitions/weather'
-  /fiveday:
-    get:
-      operationId: "api.resources.WeatherFiveDayResource.get"
-      tags:
-        - "Weather"
-      summary: "Provides the upcoming five day weather information for a given location."
-      description: "Provides the upcoming five day weather information for a given location."
-      responses:
-        200:
-          description: "Successful request for weather"
-          schema:
-            $ref: '#/definitions/fiveday'
 # Definitions of responses bodies and data types
 definitions:
+  # events:
   fiveday:
     type: array
     description: A listing of the next five days of weather reports for a given location.
@@ -80,6 +105,40 @@ definitions:
           type: string
           description: A summary of the daily weather.
           example: Rainy with scattered clouds.
+  hotel:
+    type: string
+    description: An address for a hotel.
+    example: {house_number: 12345, street: Le Main St., city: New Orleans}
+  hotels:
+      type: array
+      description: A listing of the next five days of weather reports for a given location.
+      example: [
+      {city: Springfield, time: '2019-12-05 20:34:32', temperature: -10 degrees fahrenheit, description: Don't leave your house.},
+      {city: Springfield, time: '2019-12-06 20:34:32', temperature: -13 degrees fahrenheit, description: Don't leave your house.},
+      {city: Springfield, time: '2019-12-07 20:34:32', temperature: 10 degrees fahrenheit, description: Don't leave your house.},
+      {city: Springfield, time: '2019-12-08 20:34:32', temperature: 50 degrees fahrenheit, description: Bring an umbrella.},
+      {city: Springfield, time: '2019-12-09 20:34:32', temperature: 70 degrees fahrenheit, description: You should go bask in the sun.}
+      ]
+      items:
+        type: object
+        description: A daily weather report
+        example: [
+        {name: The Bates Motel, rating: 9.0, xid: 222bd8b7-6813-4aa8-a737-77826e13b141}
+        ]
+        properties:
+          name:
+            type: string
+            description: The name of the hotel.
+            example: The Bates Motel
+          rating:
+            type: string
+            description: The aggregate user rating of the hotel from data on OpenTrip.
+            example: 9.0
+          xid:
+            type: string
+            description: is unique identifier for an object in open trip map.
+            example: 12345
+  # restaurants:
   users:
     type: object
     description: A list of registered users of the application.
