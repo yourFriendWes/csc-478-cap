@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 ### Initialize Swagger component ###
 SWAGGER_URL = '/swagger'
-API_URL = '/static/swagger.yml'
+API_URL = '/swagger.yml'
 SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(
     SWAGGER_URL,
     API_URL,
