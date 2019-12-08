@@ -5,13 +5,13 @@ from app.run import db
 
 class UserModel(db.Model):
     """
-    Requirement 3.3.1: User data stored in database with encrypted password
+    Requirements 6.2.1 and 6.3.0: User data stored in database with encrypted password
     """
     __tablename__ = 'users'
 
-    id = db.Column(db.Integer, primary_key = True)
-    username = db.Column(db.String(120), unique = True, nullable = False)
-    password = db.Column(db.String(120), nullable = False)
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(120), nullable=False)
 
 
     def save_to_db(self):
@@ -30,7 +30,7 @@ class UserModel(db.Model):
 
     @classmethod
     def find_by_username(cls, username):
-        return cls.query.filter_by(username = username).first()
+        return cls.query.filter_by(username=username).first()
 
 
 
@@ -55,7 +55,7 @@ class UserModel(db.Model):
 
 class RevokedTokenModel(db.Model):
     __tablename__ = 'revoked_tokens'
-    id = db.Column(db.Integer, primary_key = True)
+    id = db.Column(db.Integer, primary_key=True)
     jti = db.Column(db.String(120))
 
     def add(self):
@@ -64,5 +64,5 @@ class RevokedTokenModel(db.Model):
 
     @classmethod
     def is_jti_blacklisted(cls, jti):
-        query = cls.query.filter_by(jti = jti).first()
+        query = cls.query.filter_by(jti=jti).first()
         return bool(query)
