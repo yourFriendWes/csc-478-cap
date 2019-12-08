@@ -8,23 +8,95 @@ consumes:
 produces:
   - "application/json"
 
-basePath: "/api"
+basePath: "/"
 
 # Paths supported by the run application
 paths:
-  /location:
+  /users:
     get:
-      operationId: "api.location.supported_locations"
+      operationId: "api.resources.AllUsers.get"
       tags:
-        - "Location"
-      summary: "The location data structure supported by the traveler application"
-      description: "Returns list of supported locations"
+        - "Users"
+      summary: "View all users of the application"
+      description: "Returns list of all users"
       responses:
         200:
-          description: "Successful request for supported locations"
+          description: "Successful request for users"
           schema:
-            type: "array"
-            items:
-              properties:
-                country:
-                  type: "string"
+            $ref: '#/definitions/users'
+  /weather:
+    get:
+      operationId: "api.resources.WeatherResource.get"
+      tags:
+        - "Weather"
+      summary: "Provides the day's weather information for a given location."
+      description: "Provides the day's weather information for a given location."
+      responses:
+        200:
+          description: "Successful request for weather"
+          schema:
+            $ref: '#/definitions/weather'
+  /fiveday:
+    get:
+      operationId: "api.resources.WeatherFiveDayResource.get"
+      tags:
+        - "Weather"
+      summary: "Provides the upcoming five day weather information for a given location."
+      description: "Provides the upcoming five day weather information for a given location."
+      responses:
+        200:
+          description: "Successful request for weather"
+          schema:
+            $ref: '#/definitions/fiveday'
+# Definitions of responses bodies and data types
+definitions:
+  fiveday:
+    type: array
+    description: A listing of the next five days of weather reports for a given location.
+    example: [
+    {city: Springfield, time: '2019-12-05 20:34:32', temperature: -10 degrees fahrenheit, description: Don't leave your house.},
+    {city: Springfield, time: '2019-12-06 20:34:32', temperature: -13 degrees fahrenheit, description: Don't leave your house.},
+    {city: Springfield, time: '2019-12-07 20:34:32', temperature: 10 degrees fahrenheit, description: Don't leave your house.},
+    {city: Springfield, time: '2019-12-08 20:34:32', temperature: 50 degrees fahrenheit, description: Bring an umbrella.},
+    {city: Springfield, time: '2019-12-09 20:34:32', temperature: 70 degrees fahrenheit, description: You should go bask in the sun.}
+    ]
+    items:
+      type: object
+      description: A daily weather report
+      properties:
+        city:
+          type: string
+          description: The name a location.
+          example: Chicago
+        time:
+          type: string
+          description: The date of the predicted weather.
+          example: 2019-12-09 20:34:32
+        temperature:
+          type: string
+          description: The temperature in fahrenheit.
+          example: 70 degrees
+        description:
+          type: string
+          description: A summary of the daily weather.
+          example: Rainy with scattered clouds.
+  users:
+    type: object
+    description: A list of registered users of the application.
+    example: {users: [username: jpresper_eckert, password: hereisanencryptedpassword]}
+    items:
+      type: object
+      description: A user.
+      properties:
+        username:
+          type: string
+          description: User chosen unique name.
+          example: jpresper_eckert
+        password:
+          type: string
+          description: An encrypted representation of a user's password
+          example: hereisanencryptedpassword
+  weather:
+    type: string
+    description: A current weather report for a given location.
+    example: {city: Springfield, temperature: -10 degrees fahrenheit, description: Don't leave your house.}
