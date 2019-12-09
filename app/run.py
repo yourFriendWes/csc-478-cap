@@ -9,8 +9,8 @@ from dotenv import load_dotenv
 
 app = Flask(__name__)
 
-### Initialize Swagger component ###
-SWAGGER_URL = '/swagger'
+### Initialize Swagger component and set to index###
+SWAGGER_URL = '/'
 API_URL = '/static/swagger.yml'
 SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(
     SWAGGER_URL,
