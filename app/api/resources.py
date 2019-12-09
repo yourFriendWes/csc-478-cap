@@ -30,11 +30,13 @@ class UserRegistration(Resource):
     """
     def post(self):
         data = parser.parse_args()
-
+        user_name=data['username']
         # Requirements 6.1.1 and 6.1.2: unique username
-        if UserModel.find_by_username(data['username']):
-            return {'message': 'User {} already exists'.format(data['username'])}
+        if UserModel.find_by_username(user_name):
+            return {'message': 'User {} already exists'.format(data['username'])}, 422
 
+        if user_name.isspace():
+            return {'message': 'User name cannot be empty space'}, 422
         # Requirement 6.2.1: encrypts password
         new_user = UserModel(
             username=data['username'],
