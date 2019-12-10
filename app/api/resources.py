@@ -30,10 +30,17 @@ class UserRegistration(Resource):
     """
     def post(self):
         data = parser.parse_args()
+        user_name=data['username']
+
+        if not user_name:
+            return {'message': 'User name is required'}, 422
+
+        if user_name.isspace():
+            return {'message': 'User name cannot be empty space'}, 422
 
         # Requirements 6.1.1 and 6.1.2: unique username
-        if UserModel.find_by_username(data['username']):
-            return {'message': 'User {} already exists'.format(data['username'])}
+        if UserModel.find_by_username(user_name):
+            return {'message': 'User {} already exists'.format(data['username'])}, 422
 
         # Requirement 6.2.1: encrypts password
         new_user = UserModel(
@@ -50,7 +57,7 @@ class UserRegistration(Resource):
                 'message': 'User {} was created'.format(data['username']),
                 'access_token': access_token,
                 'refresh_token': refresh_token
-                }
+                }, 200
         except:
             return {'message': 'Something went wrong'}, 500
 
@@ -65,7 +72,7 @@ class UserLogin(Resource):
 
         # Requirement 7.1.0: informs user of invalid credentials
         if not current_user:
-            return {'message': 'User {} doesn\'t exist'.format(data['username'])}
+            return {'message': 'User {} doesn\'t exist'.format(data['username'])}, 404
 
         if UserModel.verify_hash(data['password'], current_user.password):
             access_token = create_access_token(identity=data['username'])
@@ -89,7 +96,7 @@ class UserLogoutAccess(Resource):
         try:
             revoked_token = RevokedTokenModel(jti=jti)
             revoked_token.add()
-            return {'message': 'Access token has been revoked'}
+            return {'message': 'Access token has been revoked'}, 403
         except:
             return {'message': 'Something went wrong'}, 500
 
@@ -101,7 +108,7 @@ class UserLogoutRefresh(Resource):
         try:
             revoked_token = RevokedTokenModel(jti=jti)
             revoked_token.add()
-            return {'message': 'Refresh token has been revoked'}
+            return {'message': 'Refresh token has been revoked'}, 403
         except:
             return {'message': 'Something went wrong'}, 500
 
@@ -109,9 +116,6 @@ class UserLogoutRefresh(Resource):
 class AllUsers(Resource):
     def get(self):
         return UserModel.return_all()
-
-    def delete(self):
-        return UserModel.delete_all()
 
 
 class WeatherResource(Resource):
@@ -152,7 +156,7 @@ class WeatherResource(Resource):
                 'temperature': response['main']['temp'],
                 'description': response['weather'][0]['description']
             }
-            return weather_data
+            return weather_data, 200
         # Requirement 1.2.0: informs user if no information was found
         except:
             return {"error": "No weather information found"}, 404
@@ -199,7 +203,7 @@ class WeatherFiveDayResource(Resource):
                     'description': item['weather'][0]['description']
                 }
                 five_day.append(details)
-            return five_day
+            return five_day, 200
         # Requirement 1.2.0: informs user if no information was found
         except:
             return{"error": "No weather information found"}, 404
@@ -255,7 +259,7 @@ class RestaurantResource(Resource):
                     'rating': item['restaurant']['user_rating']['aggregate_rating']
                 }
                 restaurant_list.append(restaurant)
-            return restaurant_list
+            return restaurant_list, 200
         # Requirement 1.2.0: informs user if no information was found
         except:
             return {"error": "No restaurant information found"}, 404
@@ -278,7 +282,7 @@ class RestaurantResource(Resource):
                 'city_id': response['location_suggestions'][0]['entity_id'],
                 'type': response['location_suggestions'][0]['entity_type']
             }
-            return city_info
+            return city_info, 200
         # Requirement 1.2.0: informs user if no information was found
         except:
             return {"error": "no info from get_city_id()"}, 404
@@ -298,7 +302,7 @@ class EventResource(Resource):
                 location = get_location_by_ip()
                 zipcode = str(location['zipcode'])
             except:
-                return location["error"]
+                return {"An error was encountered while getting IP location. Please try again, or submit a zipcode"}, 500
         # Requirement 1.1.0: location zip code is provided by user
         else:
             zipcode = str(data['zipcode'])

@@ -6,7 +6,7 @@ Clone the repo locally
 
 Install required imports `pip install -r requirements.txt`
 
-# Running api locally
+<!-- # Running api locally
 
 Make sure you are in the /app directory when running the following commands
 
@@ -81,4 +81,4 @@ For example, if you had a new file called `orange.py` with a function called squ
 Pytest can be run in a variety of ways, but one way is to run it as a module with the command:
 ```
 python -m pytest tests/
-```
+``` -->

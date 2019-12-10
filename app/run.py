@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 app = Flask(__name__)
 
 ### Initialize Swagger component ###
-SWAGGER_URL = '/swagger'
+SWAGGER_URL = ''
 API_URL = '/static/swagger.yml'
 SWAGGERUI_BLUEPRINT = get_swaggerui_blueprint(
     SWAGGER_URL,
@@ -31,7 +31,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 db = SQLAlchemy()
 db.init_app(app)
 
-from app.api import models, resources, views
+from app.api import models, resources
 
 @app.before_first_request
 def create_tables():
@@ -55,7 +55,7 @@ api.add_resource(resources.UserLogin, '/login')
 api.add_resource(resources.UserLogoutAccess, '/logout/access')
 api.add_resource(resources.UserLogoutRefresh, '/logout/refresh')
 api.add_resource(resources.TokenRefresh, '/token/refresh')
-api.add_resource(resources.AllUsers, '/users')
+# api.add_resource(resources.AllUsers, '/users')
 api.add_resource(resources.WeatherResource, '/weather')
 api.add_resource(resources.WeatherFiveDayResource, '/fiveday')
 api.add_resource(resources.RestaurantResource, '/restaurants')
