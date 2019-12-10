@@ -101,12 +101,6 @@ paths:
       tags:
         - Users
       summary: Register as a user of the API
-      parameters:
-        - in: query
-          name: zipcode
-          required: false
-          schema:
-            type: string
       description: Returns user access token upon successful registration
       responses:
         '200':
