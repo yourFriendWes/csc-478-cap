@@ -95,7 +95,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/hotels'
-  /register:
+  /registration:
     post:
       operationId: api.resources.UserRegistration.post
       tags:
