@@ -57,7 +57,7 @@ paths:
       summary: Returns the address information for a given hotel
       parameters:
         - in: query
-          name: zipcode
+          name: xid
           required: false
           schema:
             type: string
