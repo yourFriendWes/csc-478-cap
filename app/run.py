@@ -31,7 +31,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 db = SQLAlchemy()
 db.init_app(app)
 
-from app.api import models, resources, views
+from app.api import models, resources
 
 @app.before_first_request
 def create_tables():
