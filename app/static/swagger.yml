@@ -177,8 +177,8 @@ paths:
       tags:
         - Weather
       summary: Provides the day's weather information for a given location.
-      requestBody:
-        $ref: '#/components/requestBodies/ZipCodeBody'
+      # requestBody:
+      #   $ref: '#/components/requestBodies/ZipCodeBody'
       parameters:
         - in: query
           name: zipcode
