@@ -13,7 +13,7 @@ paths:
         - Events
       summary: Returns local events for a given zipcode or ipaddress location
       parameters:
-        - in: header
+        - in: query
           name: zipcode
           required: false
           schema:
@@ -34,7 +34,7 @@ paths:
         - Weather
       summary: Provides the upcoming five day weather information for a given location.
       parameters:
-        - in: header
+        - in: query
           name: zipcode
           required: false
           schema:
@@ -56,7 +56,7 @@ paths:
         - Hotel
       summary: Returns the address information for a given hotel
       parameters:
-        - in: header
+        - in: query
           name: zipcode
           required: false
           schema:
@@ -80,7 +80,7 @@ paths:
         Returns the name, rating, and identifying information for hotels in a
         given area
       parameters:
-        - in: header
+        - in: query
           name: zipcode
           required: false
           schema:
@@ -101,6 +101,12 @@ paths:
       tags:
         - Users
       summary: Register as a user of the API
+      parameters:
+        - in: query
+          name: zipcode
+          required: false
+          schema:
+            type: string
       description: Returns user access token upon successful registration
       responses:
         '200':
@@ -150,11 +156,9 @@ paths:
       operationId: api.resources.RestaurantResource.get
       tags:
         - Restaurants
-      summary: >-
-        Returns the name, rating, and identifying information for restaurants in
-        a given area
+      summary: Returns the name, rating, and identifying information for restaurants in a given area
       parameters:
-        - in: header
+        - in: query
           name: zipcode
           required: false
           schema:
@@ -177,8 +181,6 @@ paths:
       tags:
         - Weather
       summary: Provides the day's weather information for a given location.
-      # requestBody:
-      #   $ref: '#/components/requestBodies/ZipCodeBody'
       parameters:
         - in: query
           name: zipcode
@@ -193,19 +195,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/weather'
-# servers:
-#   - url: '/'
 components:
-  requestBodies:
-    ZipCodeBody:
-        description: A JSON object containing zipcode information
-        content:
-          application/json:
-            schema:
-                type: object
-                properties:
-                  zipcode:
-                    type: string
   securitySchemes:
     Bearer:
       type: http
