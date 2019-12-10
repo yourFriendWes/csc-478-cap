@@ -179,12 +179,12 @@ paths:
       summary: Provides the day's weather information for a given location.
       requestBody:
         $ref: '#/components/requestBodies/ZipCodeBody'
-      # parameters:
-      #   - in: header
-      #     name: zipcode
-      #     required: false
-      #     schema:
-      #       type: string
+      parameters:
+        - in: query
+          name: zipcode
+          required: false
+          schema:
+            type: string
       description: Provides the day's weather information for a given location.
       responses:
         '200':
