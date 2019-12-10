@@ -1,20 +1,8 @@
-swagger: "2.0"
+openapi: 3.0.0
 info:
   description: This is the capstone project for group 8
-  version: "0.0.1"
+  version: "1.0-oas3"
   title: Traveler API
-consumes:
-  - "application/json"
-produces:
-  - "application/json"
-securityDefinitions:
-  Bearer:
-    type: apiKey
-    name: Authorization
-    in: header
-basePath: "/"
-
-# Paths supported by the run application
 paths:
   /events:
     get:
@@ -23,227 +11,298 @@ paths:
       operationId: api.resources.EventResource.get
       tags:
         - Events
-      summary: "Returns local events for a given zipcode or ipaddress location"
-      responses:
-        200:
-          description: "Successful request for events"
+      summary: Returns local events for a given zipcode or ipaddress location
+      parameters:
+        - in: header
+          name: zipcode
+          required: false
           schema:
-            $ref: '#/definitions/events'
+            type: string
+      responses:
+        '200':
+          description: Successful request for events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/events'
   /fiveday:
     get:
       security:
         - Bearer: []
-      operationId: "api.resources.WeatherFiveDayResource.get"
+      operationId: api.resources.WeatherFiveDayResource.get
       tags:
-        - "Weather"
-      summary: "Provides the upcoming five day weather information for a given location."
-      consumes:
-        - application/json
-      description: "Provides the upcoming five day weather information for a given location."
-      responses:
-        200:
-          description: "Successful request for weather"
+        - Weather
+      summary: Provides the upcoming five day weather information for a given location.
+      parameters:
+        - in: header
+          name: zipcode
+          required: false
           schema:
-            $ref: '#/definitions/fiveday'
+            type: string
+      description: Provides the upcoming five day weather information for a given location.
+      responses:
+        '200':
+          description: Successful request for weather
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/fiveday'
   /hotel:
     get:
       security:
         - Bearer: []
-      operationId: "api.resources.HotelInfoResource.get"
+      operationId: api.resources.HotelInfoResource.get
       tags:
-        - "Hotel"
-      summary: "Returns the address information for a given hotel"
-      description: "Returns the address information for a given hotel"
-      responses:
-        200:
-          description: "Successful request for hotel information"
+        - Hotel
+      summary: Returns the address information for a given hotel
+      parameters:
+        - in: header
+          name: zipcode
+          required: false
           schema:
-            $ref: '#/definitions/hotel'
+            type: string
+      description: Returns the address information for a given hotel
+      responses:
+        '200':
+          description: Successful request for hotel information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/hotel'
   /hotels:
     get:
       security:
         - Bearer: []
-      operationId: "api.resources.HotelResource.get"
+      operationId: api.resources.HotelResource.get
       tags:
-        - "Hotel"
-      summary: "Returns the name, rating, and identifying information for hotels in a given area"
-      description: "Returns the name, rating, and identifying information for hotels in a given area"
-      responses:
-        200:
-          description: "Successful request for hotels information"
+        - Hotel
+      summary: >-
+        Returns the name, rating, and identifying information for hotels in a
+        given area
+      parameters:
+        - in: header
+          name: zipcode
+          required: false
           schema:
-            $ref: '#/definitions/hotels'
-  # /users:
-  #   get:
-  #     operationId: "api.resources.AllUsers.get"
-  #     tags:
-  #       - "Users"
-  #     summary: "View all users of the application"
-  #     description: "Returns list of all users"
-  #     responses:
-  #       200:
-  #         description: "Successful request for users"
-  #         schema:
-  #           $ref: '#/definitions/users'
+            type: string
+      description: >-
+        Returns the name, rating, and identifying information for hotels in a
+        given area
+      responses:
+        '200':
+          description: Successful request for hotels information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/hotels'
   /register:
     post:
-      operationId: "api.resources.UserRegistration.post"
+      operationId: api.resources.UserRegistration.post
       tags:
-        - "Users"
-      summary: "Register as a user of the API"
-      description: "Returns user access token upon successful registration"
-      consumes:
-        - application/json
-      parameters:
-        - in: body
-          name: user
-          description: The user to create.
-          schema:
-            type: object
-            required:
-              - username
-              - password
-            properties:
-              username:
-                type: string
-              password:
-                type: string
+        - Users
+      summary: Register as a user of the API
+      description: Returns user access token upon successful registration
       responses:
-        200:
+        '200':
           description: User access and refresh tokens
-          schema:
-            type: object
-            example: {
-                        message: User jpresper_eckert was created,
-                        access_token: "ey7777777k5MDA4IiwiZXhwIjoxNTc1OTQxOTQ3L77777CJmcmVzaCI6ZmFsc2UsInR5cGUiOiJhY2Nlc3MifQ.JXa4ngnr60000000fujQ",
-                        refresh_token: "hhuiodfljadsljfladsjfpIjoiZmZjYjY5Y2YtYjIxZC00MFGIHGDKSoihewnncoi8ejkds0eXBlIjoicmVmcmVzamGCHAW1A"
-                      }
-            properties:
-              message:
-                type: string
-                description: A success message that confirms username registration
-              access_token:
-                type: string
-                description: Token user will use to access other endpoints and resources
-              refresh_token:
-                type: string
-                description: Token user can use to refresh token if access_token expires
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: User jpresper_eckert was created
+                  access_token: >-
+                    ey7777777k5MDA4IiwiZXhwIjoxNTc1OTQxOTQ3L77777CJmcmVzaCI6ZmFsc2UsInR5cGUiOiJhY2Nlc3MifQ.JXa4ngnr60000000fujQ
+                  refresh_token: >-
+                    hhuiodfljadsljfladsjfpIjoiZmZjYjY5Y2YtYjIxZC00MFGIHGDKSoihewnncoi8ejkds0eXBlIjoicmVmcmVzamGCHAW1A
+                properties:
+                  message:
+                    type: string
+                    description: A success message that confirms username registration
+                  access_token:
+                    type: string
+                    description: >-
+                      Token user will use to access other endpoints and
+                      resources
+                  refresh_token:
+                    type: string
+                    description: >-
+                      Token user can use to refresh token if access_token
+                      expires
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+        description: The user to create.
   /restaurants:
     get:
       security:
         - Bearer: []
-      operationId: "api.resources.RestaurantResource.get"
+      operationId: api.resources.RestaurantResource.get
       tags:
-        - "Restaurants"
-      summary: "Returns the name, rating, and identifying information for restaurants in a given area"
-      description: "Returns the name, rating, and identifying information for restaurants in a given area"
-      responses:
-        200:
-          description: "Successful request for restaurants information"
+        - Restaurants
+      summary: >-
+        Returns the name, rating, and identifying information for restaurants in
+        a given area
+      parameters:
+        - in: header
+          name: zipcode
+          required: false
           schema:
-            $ref: '#/definitions/restaurants'
+            type: string
+      description: >-
+        Returns the name, rating, and identifying information for restaurants in
+        a given area
+      responses:
+        '200':
+          description: Successful request for restaurants information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/restaurants'
   /weather:
     get:
       security:
         - Bearer: []
-      operationId: "api.resources.WeatherResource.get"
+      operationId: api.resources.WeatherResource.get
       tags:
-        - "Weather"
-      summary: "Provides the day's weather information for a given location."
-      description: "Provides the day's weather information for a given location."
-      responses:
-        200:
-          description: "Successful request for weather"
+        - Weather
+      summary: Provides the day's weather information for a given location.
+      parameters:
+        - in: header
+          name: zipcode
+          required: false
           schema:
-            $ref: '#/definitions/weather'
-# Definitions of responses bodies and data types
-definitions:
-  events:
-    type: array
-    description: A listing of nearby upcoming events
-    example: [
-    {
-      name: County Fair,
-      date: September 20, 2020,
-      venue: County Fairgrounds,
-      classifications: Festival,
-      address: 1234 Manchester St., Streamwood IL
-      },
-      {
-      name: Goat Olympics,
-      date: September 30, 2020,
-      venue: County Fairgrounds,
-      classifications: Competition,
-      address: 1234 Manchester St., Streamwood IL
-      },
-    ]
-    items:
-      type: object
-      description: An event description
-      properties:
-        name:
-          type: string
-          description: The name an event.
-          example: County Fair
-        date:
-          type: string
-          description: The date of the event.
-          example: September 20, 2020
-        classifications:
-          type: string
-          description: A description of the type of event.
-          example: Festival
-        venue:
-          type: string
-          description: The name of the location that the event will be held
-          example: County Fairgrounds
-        address:
-          type: string
-          description: The address of the event.
-          example: 1234 Manchester St., Streamwood IL
-  fiveday:
-    type: array
-    description: A listing of the next five days of weather reports for a given location.
-    example: [
-    {city: Springfield, time: '2019-12-05 20:34:32', temperature: -10 degrees fahrenheit, description: Don't leave your house.},
-    {city: Springfield, time: '2019-12-06 20:34:32', temperature: -13 degrees fahrenheit, description: Don't leave your house.},
-    {city: Springfield, time: '2019-12-07 20:34:32', temperature: 10 degrees fahrenheit, description: Don't leave your house.},
-    {city: Springfield, time: '2019-12-08 20:34:32', temperature: 50 degrees fahrenheit, description: Bring an umbrella.},
-    {city: Springfield, time: '2019-12-09 20:34:32', temperature: 70 degrees fahrenheit, description: You should go bask in the sun.}
-    ]
-    items:
-      type: object
-      description: A daily weather report
-      properties:
-        city:
-          type: string
-          description: The name a location.
-          example: Chicago
-        time:
-          type: string
-          description: The date of the predicted weather.
-          example: 2019-12-09 20:34:32
-        temperature:
-          type: string
-          description: The temperature in fahrenheit.
-          example: 70 degrees
-        description:
-          type: string
-          description: A summary of the daily weather.
-          example: Rainy with scattered clouds.
-  hotel:
-    type: string
-    description: An address for a hotel.
-    example: {house_number: 12345, street: Le Main St., city: New Orleans}
-  hotels:
+            type: string
+      description: Provides the day's weather information for a given location.
+      responses:
+        '200':
+          description: Successful request for weather
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/weather'
+servers:
+  - url: 'https://virtserver.swaggerhub.com/yourFriendWes/demo/0'
+components:
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT 
+  schemas:
+    events:
+      type: array
+      description: A listing of nearby upcoming events
+      example:
+        - '2020': null
+          name: County Fair
+          date: September 20
+          venue: County Fairgrounds
+          classifications: Festival
+          address: 1234 Manchester St.
+          Streamwood IL: null
+        - '2020': null
+          name: Goat Olympics
+          date: September 30
+          venue: County Fairgrounds
+          classifications: Competition
+          address: 1234 Manchester St.
+          Streamwood IL: null
+      items:
+        type: object
+        description: An event description
+        properties:
+          name:
+            type: string
+            description: The name an event.
+            example: County Fair
+          date:
+            type: string
+            description: The date of the event.
+            example: 'September 20, 2020'
+          classifications:
+            type: string
+            description: A description of the type of event.
+            example: Festival
+          venue:
+            type: string
+            description: The name of the location that the event will be held
+            example: County Fairgrounds
+          address:
+            type: string
+            description: The address of the event.
+            example: '1234 Manchester St., Streamwood IL'
+    fiveday:
       type: array
       description: A listing of the next five days of weather reports for a given location.
+      example:
+        - city: Springfield
+          time: '2019-12-05 20:34:32'
+          temperature: '-10 degrees fahrenheit'
+          description: Don't leave your house.
+        - city: Springfield
+          time: '2019-12-06 20:34:32'
+          temperature: '-13 degrees fahrenheit'
+          description: Don't leave your house.
+        - city: Springfield
+          time: '2019-12-07 20:34:32'
+          temperature: 10 degrees fahrenheit
+          description: Don't leave your house.
+        - city: Springfield
+          time: '2019-12-08 20:34:32'
+          temperature: 50 degrees fahrenheit
+          description: Bring an umbrella.
+        - city: Springfield
+          time: '2019-12-09 20:34:32'
+          temperature: 70 degrees fahrenheit
+          description: You should go bask in the sun.
       items:
         type: object
         description: A daily weather report
-        example: [
-        {name: The Bates Motel, rating: 9.0, xid: 222bd8b7-6813-4aa8-a737-77826e13b141}
-        ]
+        properties:
+          city:
+            type: string
+            description: The name a location.
+            example: Chicago
+          time:
+            type: string
+            description: The date of the predicted weather.
+            example: '2019-12-09T20:34:32.000Z'
+          temperature:
+            type: string
+            description: The temperature in fahrenheit.
+            example: 70 degrees
+          description:
+            type: string
+            description: A summary of the daily weather.
+            example: Rainy with scattered clouds.
+    hotel:
+      type: string
+      description: An address for a hotel.
+      example:
+        house_number: 12345
+        street: Le Main St.
+        city: New Orleans
+    hotels:
+      type: array
+      description: A listing of the next five days of weather reports for a given location.
+      example:
+        - name: The Bates Motel
+          rating: 9
+          xid: 222bd8b7-6813-4aa8-a737-77826e13b141
+      items:
+        type: object
+        description: Name and rating of a hotel
         properties:
           name:
             type: string
@@ -252,27 +311,26 @@ definitions:
           rating:
             type: string
             description: The aggregate user rating of the hotel from data on OpenTrip.
-            example: 9.0
+            example: 9
           xid:
             type: string
             description: is unique identifier for an object in open trip map.
             example: 12345
-  restaurants:
+    restaurants:
       type: array
       description: A listing of nearby restaurants for a given location.
       items:
         type: object
         description: A restaurant description
-        example: [
-          {
-            name: Lotus Thai,
-            address: 7777 Wabash St., Chicago IL, 60699,
-            phone: 773-555-5555,
-            cuisine: Thai Food,
-            price_scale: $$$,
-            rating: 9.0
-          }
-        ]
+        example:
+          - '60699': null
+            name: Lotus Thai
+            address: 7777 Wabash St.
+            Chicago IL: null
+            phone: 773-555-5555
+            cuisine: Thai Food
+            price_scale: $$$
+            rating: 9
         properties:
           name:
             type: string
@@ -281,7 +339,7 @@ definitions:
           address:
             type: string
             description: The address of the restaurant.
-            example: 7777 Wabash St., Chicago IL, 60699
+            example: '7777 Wabash St., Chicago IL, 60699'
           phone:
             type: string
             description: The phone number of the restaurant.
@@ -297,24 +355,11 @@ definitions:
           rating:
             type: string
             description: The aggregate user rating of the restaurant from data on Zomato.
-            example: 9.0
-  # users:
-  #   type: object
-  #   description: A list of registered users of the application.
-  #   example: {users: [username: jpresper_eckert, password: hereisanencryptedpassword]}
-  #   items:
-  #     type: object
-  #     description: A user.
-  #     properties:
-  #       username:
-  #         type: string
-  #         description: User chosen unique name.
-  #         example: jpresper_eckert
-  #       password:
-  #         type: string
-  #         description: An encrypted representation of a user's password
-  #         example: hereisanencryptedpassword
-  weather:
-    type: string
-    description: A current weather report for a given location.
-    example: {city: Springfield, temperature: -10 degrees fahrenheit, description: Don't leave your house.}
+            example: 9
+    weather:
+      type: string
+      description: A current weather report for a given location.
+      example:
+        city: Springfield
+        temperature: '-10 degrees fahrenheit'
+        description: Don't leave your house.
