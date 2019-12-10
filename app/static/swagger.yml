@@ -177,12 +177,14 @@ paths:
       tags:
         - Weather
       summary: Provides the day's weather information for a given location.
-      parameters:
-        - in: header
-          name: zipcode
-          required: false
-          schema:
-            type: string
+      requestBody:
+        $ref: '#/components/requestBodies/ZipCodeBody'
+      # parameters:
+      #   - in: header
+      #     name: zipcode
+      #     required: false
+      #     schema:
+      #       type: string
       description: Provides the day's weather information for a given location.
       responses:
         '200':
@@ -194,6 +196,16 @@ paths:
 # servers:
 #   - url: '/'
 components:
+  requestBodies:
+    ZipCodeBody:
+        description: A JSON object containing zipcode information
+        content:
+          application/json:
+            schema:
+                type: object
+                properties:
+                  zipcode:
+                    type: string
   securitySchemes:
     Bearer:
       type: http
