@@ -191,14 +191,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/weather'
-servers:
-  - url: 'https://virtserver.swaggerhub.com/yourFriendWes/demo/0'
+# servers:
+#   - url: '/'
 components:
   securitySchemes:
     Bearer:
       type: http
       scheme: bearer
-      bearerFormat: JWT 
+      bearerFormat: JWT
   schemas:
     events:
       type: array
