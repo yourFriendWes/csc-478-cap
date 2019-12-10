@@ -282,10 +282,10 @@ class RestaurantResource(Resource):
                 'city_id': response['location_suggestions'][0]['entity_id'],
                 'type': response['location_suggestions'][0]['entity_type']
             }
-            return city_info, 200
+            return city_info
         # Requirement 1.2.0: informs user if no information was found
         except:
-            return {"error": "no info from get_city_id()"}, 404
+            return {"error": "no info from get_city_id()"}
 
 
 class EventResource(Resource):
