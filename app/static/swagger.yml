@@ -7,13 +7,19 @@ consumes:
   - "application/json"
 produces:
   - "application/json"
-
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
 basePath: "/"
 
 # Paths supported by the run application
 paths:
   /events:
     get:
+      security:
+        - Bearer: []
       operationId: api.resources.EventResource.get
       tags:
         - Events
@@ -25,6 +31,8 @@ paths:
             $ref: '#/definitions/events'
   /fiveday:
     get:
+      security:
+        - Bearer: []
       operationId: "api.resources.WeatherFiveDayResource.get"
       tags:
         - "Weather"
@@ -39,6 +47,8 @@ paths:
             $ref: '#/definitions/fiveday'
   /hotel:
     get:
+      security:
+        - Bearer: []
       operationId: "api.resources.HotelInfoResource.get"
       tags:
         - "Hotel"
@@ -51,6 +61,8 @@ paths:
             $ref: '#/definitions/hotel'
   /hotels:
     get:
+      security:
+        - Bearer: []
       operationId: "api.resources.HotelResource.get"
       tags:
         - "Hotel"
@@ -118,6 +130,8 @@ paths:
                 description: Token user can use to refresh token if access_token expires
   /restaurants:
     get:
+      security:
+        - Bearer: []
       operationId: "api.resources.RestaurantResource.get"
       tags:
         - "Restaurants"
@@ -130,6 +144,8 @@ paths:
             $ref: '#/definitions/restaurants'
   /weather:
     get:
+      security:
+        - Bearer: []
       operationId: "api.resources.WeatherResource.get"
       tags:
         - "Weather"
